@@ -7,7 +7,7 @@ class EngineTestCases(unittest.TestCase):
     def test_engine_default_creation(self):
         """Is five successfully determined to be prime?"""
         engine = Engine()
-        self.assertEqual(engine.get_name(), "Engine")
+        self.assertEqual(engine.get_name(), "engine")
 
 
 if __name__ == '__main__':
