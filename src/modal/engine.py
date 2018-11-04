@@ -1,6 +1,6 @@
 
 class Engine:
-    def __init__(self, name="engine"):
+    def __init__(self, name="ngine"):
         self.__name = name
 
     def get_name(self):
