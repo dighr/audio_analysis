@@ -4,10 +4,15 @@ from src.modal.engine import Engine
 
 class EngineTestCases(unittest.TestCase):
     """Tests for `engine.py`."""
-    def test_engine_default_creation(self):
+    def test_singleton(self):
         """Is five successfully determined to be prime?"""
-        engine = Engine()
-        self.assertEqual(engine.get_name(), "engine")
+        with self.assertRaises(Exception) as context:
+            # Trigger an exception if singleton is violated
+            Engine()
+            Engine()
+
+        self.assertTrue("This class is a singleton! Call the instance methods"
+                        in context.exception)
 
 
 if __name__ == '__main__':
