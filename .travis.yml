@@ -1,0 +1,11 @@
+language: python # => 1
+    python: # => 2
+      - "3.4.3"
+    services: # =>
+    env: # => 4
+      -DJANGO=1.10 DB=sqlite
+    install: # => 5
+      - pip install -r requirements.txt
+
+    script: # => 6
+      - python manage.py test
