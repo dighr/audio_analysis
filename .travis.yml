@@ -1,9 +1,9 @@
 language: python
 python: # => 1
-      - "3.4.3"
+      - "3.6"
 services: # => 2
 env: # => 3
-    - DJANGO=1.10 DB=sqlite
+    - DJANGO=2.1.3 DB=sqlite
 install: # => 5
     - pip install -r requirements.txt
 
