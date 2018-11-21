@@ -8,7 +8,6 @@ def text_analysis(request):
         text = request.GET.get('text')
         method = request.GET.get('method')
 
-        print(method, text)
         if (text is not None) and (method is not None):
             if method == "google":
                 value = analysis.get_text_sentiment_values(text)
