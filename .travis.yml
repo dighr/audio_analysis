@@ -1,13 +1,14 @@
 language: python
-python: # => 1
-      - "3.6"
-services: # => 2
-env: # => 3
-    - DJANGO=2.1.3 DB=sqlite
-install: # => 5
-    - pip install -r requirements.txt
-
-script: # => 6
-    - python manage.py test
-
-
+python:
+- '3.6'
+services: 
+env:
+- DJANGO=2.1.3 DB=sqlite
+install:
+- pip install -r requirements.txt
+script:
+- python manage.py test
+before_install:
+- openssl aes-256-cbc -K $encrypted_e9f4ce351427_key -iv $encrypted_e9f4ce351427_iv
+  -in speech-testing-193019-ec8087630958.json.enc -out speech-testing-193019-ec8087630958.json
+  -d
