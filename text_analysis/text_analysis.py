@@ -18,9 +18,9 @@ def get_text_sentiment_values(text):
 
     # Detects the sentiment of the text
     sentiment = client.analyze_sentiment(document=document).document_sentiment
-    sentiment_obj = AnalyzedTextBean(text, sentiment.score, sentiment.magnitude)
-
-    return json.dumps(sentiment_obj.__dict__)
+    # sentiment_obj = AnalyzedTextBean(text, sentiment.score, sentiment.magnitude)
+    # return json.dumps(sentiment_obj.__dict__)
+    return sentiment.score, sentiment.magnitude
 
 
 def get_error_message(error):
