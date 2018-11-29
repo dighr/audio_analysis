@@ -6,7 +6,7 @@ from .models import TextAnalysis
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = AudioFile
-        fields = ('file', 'remark', 'timestamp')
+        fields = ['file']
 
 
 class TextAnalysisSerializer(serializers.ModelSerializer):
