@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('text_analysis', '0002_auto_20181123_1919'),
+        ('transcription_analysis', '0002_auto_20181123_1919'),
     ]
 
     operations = [

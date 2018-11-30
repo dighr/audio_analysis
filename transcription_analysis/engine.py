@@ -1,17 +1,54 @@
 # Imports the Google Cloud client library
+import json
+import io
+
 from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
 from google.cloud import speech
 from google.cloud.speech import enums as speech_enums
-
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
 
-import json
-import io
+from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean
+from transcription_analysis.serializers import FileSerializer
 
-from text_analysis.beans import ErrorBean
+
+def handle_audio_analysis_request(request_data):
+    file_serializer = FileSerializer(data=request_data)
+    # Check for validity
+    if file_serializer.is_valid():
+        # save the file
+        file_serializer.save()
+        # get file name
+        try:
+            file_name = file_serializer.data['file']
+            # Get both the transcription and the analysis
+            text = transcribe_short_audio(file_name)
+            resp = get_text_sentiment_values(text)
+            audio_bean = AnalyzedAudioBean(audio_text=text, audio_analysis=resp)
+            resp = json.dumps(audio_bean.__dict__)
+            return resp
+        except Exception as e:
+            return get_error_message(str(e))
+    else:
+        return file_serializer.errors
+
+
+def handle_text_analysis_request(text, method):
+    global value
+    if (text is not None) and (method is not None):
+        if method == "google":
+            try:
+                value = get_text_sentiment_values(text)
+            except Exception as e:
+                get_error_message(str(e))
+        else:
+            value = get_error_message("The method specified is not supported")
+    else:
+        value = get_error_message("'text' and 'method' were not passed in the argument")
+
+    return value
 
 
 def get_text_sentiment_values(text):
@@ -63,3 +100,5 @@ def transcribe_short_audio(file_path):
         text += result.alternatives[0].transcript
 
     return text
+
+

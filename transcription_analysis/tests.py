@@ -5,7 +5,7 @@ from django.test import Client
 class ResponseTestCase(TestCase):
     def test_text_analysis_path_retreives_correct_code(self):
         c = Client()
-        response = c.get('/text_analysis/')
+        response = c.get('/transcription_analysis/')
         self.assertEqual(response.status_code, 200)
 
     def test_api_key_retrieves_correct_values(self):
