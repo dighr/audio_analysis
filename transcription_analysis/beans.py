@@ -4,11 +4,9 @@ import json
 
 
 class AnalyzedTextBean(object):
-    def __init__(self, text="", entities="", document_sentiment="", language="en"):
-        self.text = text
-        self.language = language
-        self.entities = entities
-        self.document_sentiment = document_sentiment
+    def __init__(self, analysis="{}"):
+        self.status = 1
+        self.analysis = json.loads(analysis)
 
 
 class AnalyzedAudioBean(object):

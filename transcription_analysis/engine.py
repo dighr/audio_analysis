@@ -2,9 +2,8 @@
 import json
 import io
 import os
-from pydub import AudioSegment
-
 import tempfile
+from pydub import AudioSegment
 import speech_recognition as sr
 from multiprocessing.dummy import Pool
 
@@ -16,15 +15,36 @@ from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
 
-from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean
+from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, AnalyzedTextBean
+
 
 audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
 
 
-def handle_audio_analysis_request(request):
+# given a text and a method, retreive the sentiment of that text using method modal
+def handle_text_analysis_request(text, method):
+    global value
+    if (text is not None) and (method is not None):
+        if method == "google":
+            try:
+                resp = get_text_sentiment_values(text)
+                text_bean = AnalyzedTextBean(resp)
+                value = json.dumps(text_bean.__dict__)
+            except Exception as e:
+                get_error_message(str(e))
+        else:
+            value = get_error_message("The method specified is not supported")
+    else:
+        value = get_error_message("'text' and 'method' were not passed in the argument")
+
+    return value
+
+
+# given a file on instance of UploadedFile, transcribe and analyze the audio
+def handle_audio_analysis_request(file_obj):
     try:
-        file_name = convert_audio_to_wav(request.FILES['file'])
+        file_name = convert_audio_to_wav(file_obj)
         if file_name is not None:
             # Get the duration of the audio file
             sound = AudioSegment.from_wav(file_name)
@@ -33,7 +53,7 @@ def handle_audio_analysis_request(request):
             if duration < 60:
                 text = transcribe_short_audio(file_name)
             else:
-                text = transcribe_audio_fast(file_name, name=request.FILES['file'].name)
+                text = transcribe_audio_fast(file_name, name=file_obj.name)
 
                 # Do a sentiment analysis on the transcribed text
             resp = get_text_sentiment_values(text)
@@ -42,13 +62,17 @@ def handle_audio_analysis_request(request):
             resp = json.dumps(audio_bean.__dict__)
             return resp
         else:
-            return get_error_message("The file is not in the following format (WAV, MP3, OGG)")
+            return get_error_message("File was not provided or the provided"
+                                     " file is not in the following format (WAV, MP3, OGG)")
     except Exception as e:
         return get_error_message(str(e))
 
 
-# Convert the uploaded audio file to wav if they are not and stores them under the audio files folder
+# Convert the uploaded audio file to wav if they are not and store them under the audio files folder
 def convert_audio_to_wav(file):
+    if file is None:
+        return
+
     file_name = file.name
     tempf, tempfn = tempfile.mkstemp()
 
@@ -79,7 +103,7 @@ def convert_audio_to_wav(file):
     return None
 
 
-# for audios less than one minute with wav format
+# trascribe audios less than one minute with wav format
 def transcribe_short_audio(file_path):
     # Instantiates a client
     client = speech.SpeechClient()
@@ -104,19 +128,22 @@ def transcribe_short_audio(file_path):
     return text
 
 
-# Only wav files
+# Transcribe audio with any length, the way this is done is by first, dividing the audio file into smalled chucks
+# of 45 seconds, each chuck is transcribed in a separate thread and then assembled in an ordered way at the end
 def transcribe_audio_fast(file_path, name="tmp"):
+    # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
         GOOGLE_CLOUD_SPEECH_CREDENTIALS = f.read()
 
     sound = AudioSegment.from_wav(file_path)
 
     r = sr.Recognizer()
-    # files = sorted(os.listdir('parts/'))
 
     # initialize data
     data = []
 
+    # Calculate the voice chucks in miliseconds in the following format (chuck_begin, chuck_end)
+    # Append this into the data list
     duration = sound.duration_seconds * 1000
     interval = 45 * 1000
     begin = 0
@@ -126,7 +153,6 @@ def transcribe_audio_fast(file_path, name="tmp"):
         end = duration
 
     while duration > 0:
-
         data.append((begin, end))
 
         # update
@@ -137,13 +163,15 @@ def transcribe_audio_fast(file_path, name="tmp"):
         else:
             end = (end + interval)
 
+    # This inner method will be run in a separat thread
     def transcribe(input):
         idx, value = input
-
+        # Reteive the chunck from the audio and store it in the tmp file
         sound_interval = sound[value[0]:value[1]]
         audio_segment_path = os.path.join(tmp_path, name + str(idx) + ".wav")
         sound_interval.export(audio_segment_path, format="wav")
 
+        #
         with sr.AudioFile(audio_segment_path) as source:
             audio = r.record(source)
 
@@ -172,21 +200,6 @@ def transcribe_audio_fast(file_path, name="tmp"):
 
     return transcript
 
-
-def handle_text_analysis_request(text, method):
-    global value
-    if (text is not None) and (method is not None):
-        if method == "google":
-            try:
-                value = get_text_sentiment_values(text)
-            except Exception as e:
-                get_error_message(str(e))
-        else:
-            value = get_error_message("The method specified is not supported")
-    else:
-        value = get_error_message("'text' and 'method' were not passed in the argument")
-
-    return value
 
 
 def get_text_sentiment_values(text):

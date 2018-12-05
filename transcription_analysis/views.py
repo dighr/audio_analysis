@@ -1,21 +1,16 @@
 # Create your views here.
 from django.http import HttpResponse
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework import status
 import transcription_analysis.engine as engine
 
 
 # Supports only post requests.
-# An audio file of "wav" format needs to be provided within the request
-# the file has to be less than one minute long for now
+# An audio file of "wav, MP3, or " format needs to be provided within the request
 class FileView(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-
     def post(self, request):
-        response = engine.handle_audio_analysis_request(request)
-        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        file = request.FILES.get("file")
+        response = engine.handle_audio_analysis_request(file)
+        return HttpResponse(response, content_type="text/json")
 
 
 # get the text analysis in JSON
