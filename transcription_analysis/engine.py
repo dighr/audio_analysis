@@ -24,6 +24,7 @@ tmp_path = os.path.join('.', 'tmp')
 
 # given a text and a method, retreive the sentiment of that text using method modal
 def handle_text_analysis_request(text, method):
+
     global value
     if (text is not None) and (method is not None):
         if method == "google":
@@ -32,7 +33,8 @@ def handle_text_analysis_request(text, method):
                 text_bean = AnalyzedTextBean(resp)
                 value = json.dumps(text_bean.__dict__)
             except Exception as e:
-                get_error_message(str(e))
+                print (str(e))
+                value = get_error_message(str(e))
         else:
             value = get_error_message("The method specified is not supported")
     else:
@@ -171,7 +173,6 @@ def transcribe_audio_fast(file_path, name="tmp"):
         audio_segment_path = os.path.join(tmp_path, name + str(idx) + ".wav")
         sound_interval.export(audio_segment_path, format="wav")
 
-        #
         with sr.AudioFile(audio_segment_path) as source:
             audio = r.record(source)
 
@@ -196,10 +197,7 @@ def transcribe_audio_fast(file_path, name="tmp"):
         # Format time as h:m:s - 30 seconds of text
         transcript += t['text'] + ","
 
-    print(transcript)
-
     return transcript
-
 
 
 def get_text_sentiment_values(text):
