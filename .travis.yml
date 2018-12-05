@@ -11,6 +11,8 @@ script:
 - python manage.py makemigrations
 - python manage.py test
 before_install:
-- openssl aes-256-cbc -K $encrypted_e9f4ce351427_key -iv $encrypted_e9f4ce351427_iv
+  - openssl aes-256-cbc -K $encrypted_e9f4ce351427_key -iv $encrypted_e9f4ce351427_iv
   -in speech-testing-193019-ec8087630958.json.enc -out speech-testing-193019-ec8087630958.json
   -d
+  - sudo apt-get install -y libav-tools libavcodec-extra
+  - sudo apt-get install -y ffmpeg libavcodec-extra

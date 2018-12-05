@@ -14,7 +14,7 @@ class FileView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
-        response = engine.handle_audio_analysis_request(request.data)
+        response = engine.handle_audio_analysis_request(request)
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
