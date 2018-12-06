@@ -62,8 +62,15 @@ To analyze a text file, make a get request similar to the following
  Attach the audio file within the body of the request in the following format
 'file=audio_file_path'
  
-## Sample Output
-* Sample out of text analysis response taken from an article from CNN
+## Sample Outputs
+
+ 
+<details>
+<summary>
+Sample out of a text analysis response of a portion of an article taken from CNN
+ </summary>
+<p>
+
  ```json
 {
     "status": 1,
@@ -676,6 +683,9 @@ To analyze a text file, make a get request similar to the following
     }
 }
  ```
+ 
+ </p>
+</details>
  
  * Sample output of the audio analysis post request for the following ted talk
  https://www.ted.com/talks/brene_brown_on_vulnerability?language=en
