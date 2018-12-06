@@ -10576,21 +10576,36 @@ To analyze a text file, make a get request similar to the following
  
   </p>
 </details>
- * Sample output for a failed text analysis request in case any of the required arguments were not provided
-  ```
+
+ <details>
+  <summary>
+     Sample output for a failed text analysis request in case any of the required arguments were not provided
+  </summary>
+ <p>
+ 
+ ```json
  {
     "status": 0,
     "error": "'text' and 'method' were not passed in the argument"
  }
   ```
- 
- * Sample output for failed audio analysis response in case a file was not provided
-```
+  </p>
+  
+</details> 
+
+ <details>
+  <summary>
+    Sample output for failed audio analysis response in case a file was not provided
+  </summary>
+ <p>
+```json
   {
     "status": 0,
     "error": "File was not provided or the provided file is not in the following format (WAV, MP3, OGG)"
-}
+  }
  ```
+ </p>
+ </details>
  
 
 
