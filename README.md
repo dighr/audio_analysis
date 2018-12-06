@@ -55,7 +55,7 @@ To analyze a text file, make a get request similar to the following
  ```
  http://localhost:PORT/text/analyze?text=text_to_be_analyzed&method=google
  ```
- To analyze an   audio file, make a post request to the following URL
+ To analyze an audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/analyze
  ```
@@ -10579,7 +10579,7 @@ To analyze a text file, make a get request similar to the following
 
  <details>
   <summary>
-     Sample output for a failed text analysis request in case any of the required arguments were not provided
+     Sample output of a failed text analysis request in case any of the required arguments were not provided
   </summary>
  <p>
  
@@ -10595,7 +10595,7 @@ To analyze a text file, make a get request similar to the following
 
  <details>
   <summary>
-    Sample output for failed audio analysis response in case a file was not provided
+    Sample output for failed audio analysis response in case an audio file was not provided
   </summary>
  <p>
 ```json
@@ -10622,6 +10622,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * A lot of functionalities was enabled thanks to the Pydub library https://github.com/jiaaro/pydub
-* For long audio files, a method created by the following git repo 	https://github.com/akras14/speech-to-text.git was used
-  We make the audio encoding and the audio file splitting automatic
+* For long audio files, a method created by the following git repo 	https://github.com/akras14/speech-to-text.git was used. 
+ However, we make the audio encoding and the audio file splitting automatic
 
