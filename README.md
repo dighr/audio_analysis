@@ -1,7 +1,7 @@
 # Audio Analysis
 In this project, an API is created to transcribe and analyze the sentiment values of 
 audio files. 
-The audio file can be 
+The audio file can be in any format supported by pydub python library
 
 ### Prerequisites
 All of the following needs to be installed in your device
