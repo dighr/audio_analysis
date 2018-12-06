@@ -55,7 +55,7 @@ To analyze a text file, make a get request similar to the following
  ```
  http://localhost:PORT/text/analyze?text=text_to_be_analyzed&method=google
  ```
- To analyze an audio file, make a post request to the following URL
+ To analyze an   audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/analyze
  ```
@@ -66,629 +66,633 @@ To analyze a text file, make a get request similar to the following
 
  
 <details>
-<summary>
-Sample out of a text analysis response of a portion of an article taken from CNN
- </summary>
-<p>
+  <summary>
+        Sample out of a text analysis response of a portion of an article taken from CNN
+  </summary>
+ <p>
 
  ```json
-{
-    "status": 1,
-    "analysis": {
-        "sentences": [
-            {
-                "text": {
-                    "content": "President Donald Trump told special counsel Robert Mueller in writing that Roger Stone did not tell him about WikiLeaks, nor was he told about the 2016 Trump Tower meeting between his son, campaign officials and a Russian lawyer promising dirt on Hillary Clinton, according to two sources familiar with the matter.",
-                    "beginOffset": -1
-                },
-                "sentiment": {}
-            },
-            {
-                "text": {
-                    "content": "One source described the President's answers without providing any direct quotes and said the President made clear he was answering to the best of his recollection.",
-                    "beginOffset": -1
-                },
-                "sentiment": {
-                    "magnitude": 0.4000000059604645,
-                    "score": 0.4000000059604645
-                }
-            },
-            {
-                "text": {
-                    "content": "This is the first insight into how the President responded to the Mueller team's written questions -- a key unknown as Mueller aims to wrap up his investigation and prepare his final report.",
-                    "beginOffset": -1
-                },
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            }
-        ],
-        "entities": [
-            {
-                "name": "Donald Trump",
-                "type": "PERSON",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/Donald_Trump",
-                    "mid": "/m/0cqt90"
-                },
-                "salience": 0.37138432264328003,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Donald Trump",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
+    {
+        "status": 1,
+        "analysis": {
+            "sentences": [
+                {
+                    "text": {
+                        "content": "President Donald Trump told special counsel Robert Mueller in writing that Roger Stone did not tell him about WikiLeaks, nor was he told about the 2016 Trump Tower meeting between his son, campaign officials and a Russian lawyer promising dirt on Hillary Clinton, according to two sources familiar with the matter.",
+                        "beginOffset": -1
                     },
-                    {
-                        "text": {
-                            "content": "President",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
-                    },
-                    {
-                        "text": {
-                            "content": "President",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    },
-                    {
-                        "text": {
-                            "content": "President",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.800000011920929,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "Robert Mueller",
-                "type": "PERSON",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Mueller",
-                    "mid": "/m/02djmh"
+                    "sentiment": {}
                 },
-                "salience": 0.2821030616760254,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Robert Mueller",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
+                {
+                    "text": {
+                        "content": "One source described the President's answers without providing any direct quotes and said the President made clear he was answering to the best of his recollection.",
+                        "beginOffset": -1
                     },
-                    {
-                        "text": {
-                            "content": "counsel",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
+                    "sentiment": {
+                        "magnitude": 0.4000000059604645,
+                        "score": 0.4000000059604645
+                    }
+                },
+                {
+                    "text": {
+                        "content": "This is the first insight into how the President responded to the Mueller team's written questions -- a key unknown as Mueller aims to wrap up his investigation and prepare his final report.",
+                        "beginOffset": -1
                     },
-                    {
-                        "text": {
-                            "content": "Mueller",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {}
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
+                    }
+                }
+            ],
+            "entities": [
+                {
+                    "name": "Donald Trump",
+                    "type": "PERSON",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/Donald_Trump",
+                        "mid": "/m/0cqt90"
                     },
-                    {
-                        "text": {
-                            "content": "Mueller",
-                            "beginOffset": -1
+                    "salience": 0.37138432264328003,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Donald Trump",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         },
-                        "type": "PROPER",
-                        "sentiment": {}
+                        {
+                            "text": {
+                                "content": "President",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "text": {
+                                "content": "President",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        },
+                        {
+                            "text": {
+                                "content": "President",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.800000011920929,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 1.100000023841858,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "Roger Stone",
-                "type": "PERSON",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/Roger_Stone",
-                    "mid": "/m/05r8b8"
                 },
-                "salience": 0.157715305685997,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Roger Stone",
-                            "beginOffset": -1
+                {
+                    "name": "Robert Mueller",
+                    "type": "PERSON",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/Robert_Mueller",
+                        "mid": "/m/02djmh"
+                    },
+                    "salience": 0.2821030616760254,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Robert Mueller",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         },
-                        "type": "PROPER",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.30000001192092896,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "meeting",
-                "type": "EVENT",
-                "salience": 0.018298445269465446,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "meeting",
-                            "beginOffset": -1
+                        {
+                            "text": {
+                                "content": "counsel",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
+                        {
+                            "text": {
+                                "content": "Mueller",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
+                        },
+                        {
+                            "text": {
+                                "content": "Mueller",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 1.100000023841858,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "sources",
-                "type": "PERSON",
-                "salience": 0.014273649081587791,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "sources",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "matter",
-                "type": "OTHER",
-                "salience": 0.012554647400975227,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "matter",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "campaign officials",
-                "type": "PERSON",
-                "salience": 0.012402627617120743,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "campaign officials",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "lawyer",
-                "type": "PERSON",
-                "salience": 0.012402627617120743,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "lawyer",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
-                        }
-                    }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "son",
-                "type": "PERSON",
-                "salience": 0.012402627617120743,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "son",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "dirt",
-                "type": "OTHER",
-                "salience": 0.012402627617120743,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "dirt",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "Trump Tower",
-                "type": "LOCATION",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/Trump_Tower",
-                    "mid": "/m/04qqj8"
                 },
-                "salience": 0.01088088471442461,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Trump Tower",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
+                {
+                    "name": "Roger Stone",
+                    "type": "PERSON",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/Roger_Stone",
+                        "mid": "/m/05r8b8"
+                    },
+                    "salience": 0.157715305685997,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Roger Stone",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.30000001192092896,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "WikiLeaks",
-                "type": "ORGANIZATION",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/WikiLeaks",
-                    "mid": "/m/027m_21"
                 },
-                "salience": 0.01088088471442461,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "WikiLeaks",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {}
+                {
+                    "name": "meeting",
+                    "type": "EVENT",
+                    "salience": 0.018298445269465446,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "meeting",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "source",
-                "type": "OTHER",
-                "salience": 0.009939493611454964,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "source",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "President",
-                "type": "PERSON",
-                "salience": 0.00810279045253992,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "President",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "Hillary Clinton",
-                "type": "PERSON",
-                "metadata": {
-                    "wikipedia_url": "https://en.wikipedia.org/wiki/Hillary_Clinton",
-                    "mid": "/m/0d06m5"
                 },
-                "salience": 0.007359262555837631,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Hillary Clinton",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "Russian",
-                "type": "LOCATION",
-                "salience": 0.007359262555837631,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "Russian",
-                            "beginOffset": -1
-                        },
-                        "type": "PROPER",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "insight",
-                "type": "OTHER",
-                "salience": 0.007166363764554262,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "insight",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.6000000238418579,
-                            "score": 0.6000000238418579
+                {
+                    "name": "sources",
+                    "type": "PERSON",
+                    "salience": 0.014273649081587791,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "sources",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.699999988079071,
-                    "score": 0.30000001192092896
-                }
-            },
-            {
-                "name": "answers",
-                "type": "OTHER",
-                "salience": 0.0065950071439146996,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "answers",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "quotes",
-                "type": "OTHER",
-                "salience": 0.004241628106683493,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "quotes",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "questions",
-                "type": "OTHER",
-                "salience": 0.004169093910604715,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "questions",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "team",
-                "type": "ORGANIZATION",
-                "salience": 0.004169093910604715,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "team",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "unknown",
-                "type": "OTHER",
-                "salience": 0.004169093910604715,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "unknown",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "investigation",
-                "type": "EVENT",
-                "salience": 0.0029199873097240925,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "investigation",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {}
-                    }
-                ],
-                "sentiment": {}
-            },
-            {
-                "name": "report",
-                "type": "WORK_OF_ART",
-                "salience": 0.002428423846140504,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "report",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
+                },
+                {
+                    "name": "matter",
+                    "type": "OTHER",
+                    "salience": 0.012554647400975227,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "matter",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "best",
-                "type": "OTHER",
-                "salience": 0.0018394036451354623,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "best",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.10000000149011612,
-                            "score": 0.10000000149011612
+                },
+                {
+                    "name": "campaign officials",
+                    "type": "PERSON",
+                    "salience": 0.012402627617120743,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "campaign officials",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.10000000149011612,
-                    "score": 0.10000000149011612
-                }
-            },
-            {
-                "name": "recollection",
-                "type": "OTHER",
-                "salience": 0.0018394036451354623,
-                "mentions": [
-                    {
-                        "text": {
-                            "content": "recollection",
-                            "beginOffset": -1
-                        },
-                        "type": "COMMON",
-                        "sentiment": {
-                            "magnitude": 0.4000000059604645,
-                            "score": 0.4000000059604645
+                },
+                {
+                    "name": "lawyer",
+                    "type": "PERSON",
+                    "salience": 0.012402627617120743,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "lawyer",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
                         }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
                     }
-                ],
-                "sentiment": {
-                    "magnitude": 0.4000000059604645,
-                    "score": 0.4000000059604645
+                },
+                {
+                    "name": "son",
+                    "type": "PERSON",
+                    "salience": 0.012402627617120743,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "son",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "dirt",
+                    "type": "OTHER",
+                    "salience": 0.012402627617120743,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "dirt",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "Trump Tower",
+                    "type": "LOCATION",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/Trump_Tower",
+                        "mid": "/m/04qqj8"
+                    },
+                    "salience": 0.01088088471442461,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Trump Tower",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
+                    }
+                },
+                {
+                    "name": "WikiLeaks",
+                    "type": "ORGANIZATION",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/WikiLeaks",
+                        "mid": "/m/027m_21"
+                    },
+                    "salience": 0.01088088471442461,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "WikiLeaks",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "source",
+                    "type": "OTHER",
+                    "salience": 0.009939493611454964,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "source",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "President",
+                    "type": "PERSON",
+                    "salience": 0.00810279045253992,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "President",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "Hillary Clinton",
+                    "type": "PERSON",
+                    "metadata": {
+                        "wikipedia_url": "https://en.wikipedia.org/wiki/Hillary_Clinton",
+                        "mid": "/m/0d06m5"
+                    },
+                    "salience": 0.007359262555837631,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Hillary Clinton",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "Russian",
+                    "type": "LOCATION",
+                    "salience": 0.007359262555837631,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "Russian",
+                                "beginOffset": -1
+                            },
+                            "type": "PROPER",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "insight",
+                    "type": "OTHER",
+                    "salience": 0.007166363764554262,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "insight",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.6000000238418579,
+                                "score": 0.6000000238418579
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.699999988079071,
+                        "score": 0.30000001192092896
+                    }
+                },
+                {
+                    "name": "answers",
+                    "type": "OTHER",
+                    "salience": 0.0065950071439146996,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "answers",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "quotes",
+                    "type": "OTHER",
+                    "salience": 0.004241628106683493,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "quotes",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "questions",
+                    "type": "OTHER",
+                    "salience": 0.004169093910604715,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "questions",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "team",
+                    "type": "ORGANIZATION",
+                    "salience": 0.004169093910604715,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "team",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "unknown",
+                    "type": "OTHER",
+                    "salience": 0.004169093910604715,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "unknown",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "investigation",
+                    "type": "EVENT",
+                    "salience": 0.0029199873097240925,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "investigation",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {}
+                        }
+                    ],
+                    "sentiment": {}
+                },
+                {
+                    "name": "report",
+                    "type": "WORK_OF_ART",
+                    "salience": 0.002428423846140504,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "report",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
+                    }
+                },
+                {
+                    "name": "best",
+                    "type": "OTHER",
+                    "salience": 0.0018394036451354623,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "best",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.10000000149011612,
+                                "score": 0.10000000149011612
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.10000000149011612,
+                        "score": 0.10000000149011612
+                    }
+                },
+                {
+                    "name": "recollection",
+                    "type": "OTHER",
+                    "salience": 0.0018394036451354623,
+                    "mentions": [
+                        {
+                            "text": {
+                                "content": "recollection",
+                                "beginOffset": -1
+                            },
+                            "type": "COMMON",
+                            "sentiment": {
+                                "magnitude": 0.4000000059604645,
+                                "score": 0.4000000059604645
+                            }
+                        }
+                    ],
+                    "sentiment": {
+                        "magnitude": 0.4000000059604645,
+                        "score": 0.4000000059604645
+                    }
                 }
-            }
-        ],
-        "documentSentiment": {
-            "magnitude": 0.5,
-            "score": 0.10000000149011612
-        },
-        "language": "en"
+            ],
+            "documentSentiment": {
+                "magnitude": 0.5,
+                "score": 0.10000000149011612
+            },
+            "language": "en"
+        }
     }
-}
  ```
- 
  </p>
 </details>
  
- * Sample output of the audio analysis post request for the following ted talk
- https://www.ted.com/talks/brene_brown_on_vulnerability?language=en
+ <details>
+  <summary>
+      Sample output of the audio analysis post request for the following ted talk
+      https://www.ted.com/talks/brene_brown_on_vulnerability?language=en
+  </summary>
+ <p>
+ 
  ```
  {
     "status": 1,
@@ -10569,6 +10573,9 @@ Sample out of a text analysis response of a portion of an article taken from CNN
     }
 }
  ```
+ 
+  </p>
+</details>
  * Sample output for a failed text analysis request in case any of the required arguments were not provided
   ```
  {
