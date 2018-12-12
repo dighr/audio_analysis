@@ -32,7 +32,6 @@ def handle_text_analysis_request(text, method):
                 text_bean = AnalyzedTextBean(resp)
                 value = json.dumps(text_bean.__dict__)
             except Exception as e:
-                print (str(e))
                 value = get_error_message(str(e))
         else:
             value = get_error_message("The method specified is not supported")
@@ -54,6 +53,7 @@ def handle_audio_analysis_request(file_obj, language_code="en-US"):
         return json.dumps(audio_bean.__dict__)
 
     except Exception as e:
+        raise e
         return get_error_message(str(e))
 
 
@@ -79,6 +79,8 @@ def transcribe_any_audio(file_obj, language_code):
             text = transcribe_short_audio(file_name, language_code=language_code)
         else:
             text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
+        print("*********************************")
+        print(text)
         return text
     else:
         raise Exception("File was not provided or the provided file is not in the following format (WAV, MP3, OGG)")
@@ -95,10 +97,8 @@ def convert_audio_to_wav(file):
     try:
         for chunk in file.chunks():
             os.write(tempf, chunk)
-        print(type(tempf), tempf, type(tempfn), tempfn)
 
         file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] + ".wav")
-        print(file_path)
         # Encoding Audio file into Wav
         if file_name.endswith('.mp3'):
             sound = AudioSegment.from_mp3(tempfn)
@@ -191,8 +191,10 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
             audio = r.record(source)
 
         # Transcribe audio file
-        text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
-        print(text)
+        try:
+            text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+        except sr.UnknownValueError:
+            text = "*********sub audio was not understood****************"
         # delete
 
         #
@@ -209,7 +211,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     transcript = ""
     for t in sorted(all_text, key=lambda x: x['idx']):
         # Format time as h:m:s - 30 seconds of text
-        transcript += t['text'] + ","
+        transcript += t['text']
 
     return transcript
 

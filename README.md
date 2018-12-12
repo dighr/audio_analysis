@@ -51,9 +51,26 @@ python manage.py runserver
  
 ## Making API calls
 
-To analyze a text file, make a get request similar to the following
+###Language CODE
+All of the following API calls require a language_code as a parameter to be passed in within the body.
+Find the correct language code from the following URL
+https://cloud.google.com/speech-to-text/docs/languages
+
+
+###API CALLS
+ To transcribe an audio file, make a post request to the following URL
  ```
- http://localhost:PORT/text/analyze?text=text_to_be_analyzed&method=google
+ http://localhost:PORT/audio/transcribe
+ ```
+ Attach the audio file within the body of the request in the following format
+'file=audio_file_path'
+pass in the 'language_code' parameter into the body
+
+
+To analyze a text file, make a post request  to the following URL
+PASS in both text=text_to_be_analyzed and method=google into the body
+ ```
+ http://localhost:PORT/text/analyze
  ```
  To analyze an audio file, make a post request to the following URL
  ```
@@ -61,6 +78,8 @@ To analyze a text file, make a get request similar to the following
  ```
  Attach the audio file within the body of the request in the following format
 'file=audio_file_path'
+pass in the language_code parameter into the body
+
  
 ## Sample Outputs
  
