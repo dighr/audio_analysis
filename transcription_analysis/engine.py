@@ -177,7 +177,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
             audio = r.record(source)
 
         # Transcribe audio file
-        text = r.recognize_google_cloud(audio, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+        text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
         print(text)
         # delete
 
