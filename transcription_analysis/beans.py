@@ -16,6 +16,13 @@ class AnalyzedAudioBean(object):
         self.audio_analysis = json.loads(audio_analysis)
 
 
+class TranscribedAudioBean(object):
+    def __init__(self, file_name, audio_text):
+        self.status = 1
+        self.file_name = file_name
+        self.audio_text = audio_text
+
+
 class ErrorBean(object):
     def __init__(self, error="Error"):
         self.status = 0

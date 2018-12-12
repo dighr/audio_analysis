@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('text/analyze', views.TextAnalysisView().as_view(), name='text-analysis'),
-    path('audio/analyze', views.FileView.as_view(), name='file-upload')
+    path('audio/analyze', views.AudioAnalysisView.as_view(), name='audio-analysis'),
+    path('audio/transcribe', views.TranscriptionView.as_view(), name='audio-transcription')
 ]

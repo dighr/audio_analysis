@@ -15,8 +15,7 @@ from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
 
-from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, AnalyzedTextBean
-
+from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, AnalyzedTextBean, TranscribedAudioBean
 
 audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
@@ -46,28 +45,43 @@ def handle_text_analysis_request(text, method):
 # given a file on instance of UploadedFile, transcribe and analyze the audio
 def handle_audio_analysis_request(file_obj, language_code="en-US"):
     try:
-        file_name = convert_audio_to_wav(file_obj)
-        if file_name is not None:
-            # Get the duration of the audio file
-            sound = AudioSegment.from_wav(file_name)
-            duration = sound.duration_seconds
-            # Based on the duration, transcribe the audio files
-            if duration < 60:
-                text = transcribe_short_audio(file_name, language_code=language_code)
-            else:
-                text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
+        text = transcribe_any_audio(file_obj, language_code)
+        # Do a sentiment analysis on the transcribed text
+        resp = get_text_sentiment_values(text)
+        # return the answer in a JSON format
+        audio_bean = AnalyzedAudioBean(audio_text=text, audio_analysis=resp)
+        # return the response as json
+        return json.dumps(audio_bean.__dict__)
 
-                # Do a sentiment analysis on the transcribed text
-            resp = get_text_sentiment_values(text)
-            # return the answer in a JSON format
-            audio_bean = AnalyzedAudioBean(audio_text=text, audio_analysis=resp)
-            resp = json.dumps(audio_bean.__dict__)
-            return resp
-        else:
-            return get_error_message("File was not provided or the provided"
-                                     " file is not in the following format (WAV, MP3, OGG)")
     except Exception as e:
         return get_error_message(str(e))
+
+
+# given a file on instance of UploadedFile, transcribe the audio
+def handle_audio_transcription_request(file_obj, language_code="en-US"):
+    try:
+        text = transcribe_any_audio(file_obj, language_code)
+        # return the answer in a JSON format
+        audio_text_bean = TranscribedAudioBean(file_obj.name, text)
+        return json.dumps(audio_text_bean.__dict__)
+    except Exception as e:
+        return get_error_message(str(e))
+
+
+def transcribe_any_audio(file_obj, language_code):
+    file_name = convert_audio_to_wav(file_obj)
+    if file_name is not None:
+        # Get the duration of the audio file
+        sound = AudioSegment.from_wav(file_name)
+        duration = sound.duration_seconds
+        # Based on the duration, transcribe the audio files
+        if duration < 60:
+            text = transcribe_short_audio(file_name, language_code=language_code)
+        else:
+            text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
+        return text
+    else:
+        raise Exception("File was not provided or the provided file is not in the following format (WAV, MP3, OGG)")
 
 
 # Convert the uploaded audio file to wav if they are not and store them under the audio files folder
