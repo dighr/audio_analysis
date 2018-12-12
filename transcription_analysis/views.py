@@ -16,9 +16,9 @@ class FileView(APIView):
 # get the text analysis in JSON
 # to get valid response, text and method has to be provided in the parameter
 class TextAnalysisView(APIView):
-    def get(self, request):
-        text = request.GET.get('text')
-        method = request.GET.get('method')
+    def post(self, request):
+        text = request.POST.get('text')
+        method = request.POST.get('method')
         response = engine.handle_text_analysis_request(text, method)
         return HttpResponse(response, content_type="text/json")
 

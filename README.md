@@ -1,10 +1,10 @@
 # Audio Analysis
 In this project, an API is created to transcribe and analyze the sentiment values of 
 audio files. 
-The audio file can be in any format supported by pydub python library
+The audio file have to be in any of the following formats (WAV, MP3, OGG)
 
 ### Prerequisites
-All of the following needs to be installed in your device
+All of the following needs to be downloaded in your device
  * Python 3.6
  * virtualenv
  * pip
@@ -20,7 +20,7 @@ All of the following needs to be installed in your device
 * Create a python virtualenv 
 ```
 virtualenv -p python3 env
-```  
+```
 * Activate the virtual enviroment
 ```
 source env/bin/activate
@@ -41,7 +41,7 @@ pip install -r requirements.txt
        * In linux, just execute the following in the terminal
        ```
          export  GOOGLE_APPLICATION_CREDENTIALS=path-to-the-downloaded-json-file
-       ```    
+       ```
     
 ## Getting Started
 Assuming that the previous section is complete, you can start the server by executing the following in  a terminal
@@ -63,7 +63,6 @@ To analyze a text file, make a get request similar to the following
 'file=audio_file_path'
  
 ## Sample Outputs
-
  
 <details>
   <summary>
@@ -10598,16 +10597,16 @@ To analyze a text file, make a get request similar to the following
     Sample output for failed audio analysis response in case an audio file was not provided
   </summary>
  <p>
-```json
+ 
+ ```json
   {
     "status": 0,
     "error": "File was not provided or the provided file is not in the following format (WAV, MP3, OGG)"
   }
- ```
+```
  </p>
  </details>
  
-
 
 ## Running the tests
  ```
