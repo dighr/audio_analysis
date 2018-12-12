@@ -44,7 +44,7 @@ def handle_text_analysis_request(text, method):
 
 
 # given a file on instance of UploadedFile, transcribe and analyze the audio
-def handle_audio_analysis_request(file_obj):
+def handle_audio_analysis_request(file_obj, language_code="en-US"):
     try:
         file_name = convert_audio_to_wav(file_obj)
         if file_name is not None:
@@ -53,9 +53,9 @@ def handle_audio_analysis_request(file_obj):
             duration = sound.duration_seconds
             # Based on the duration, transcribe the audio files
             if duration < 60:
-                text = transcribe_short_audio(file_name)
+                text = transcribe_short_audio(file_name, language_code=language_code)
             else:
-                text = transcribe_audio_fast(file_name, name=file_obj.name)
+                text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
 
                 # Do a sentiment analysis on the transcribed text
             resp = get_text_sentiment_values(text)
@@ -106,7 +106,7 @@ def convert_audio_to_wav(file):
 
 
 # trascribe audios less than one minute with wav format
-def transcribe_short_audio(file_path):
+def transcribe_short_audio(file_path, language_code):
     # Instantiates a client
     client = speech.SpeechClient()
 
@@ -118,7 +118,7 @@ def transcribe_short_audio(file_path):
 
     config = speech_types.RecognitionConfig(
         encoding=speech_enums.RecognitionConfig.AudioEncoding.LINEAR16,
-        language_code='en-US')
+        language_code=language_code)
 
     # Detects speech in the audio file
     response = client.recognize(config, audio)
@@ -132,7 +132,7 @@ def transcribe_short_audio(file_path):
 
 # Transcribe audio with any length, the way this is done is by first, dividing the audio file into smalled chucks
 # of 45 seconds, each chuck is transcribed in a separate thread and then assembled in an ordered way at the end
-def transcribe_audio_fast(file_path, name="tmp"):
+def transcribe_audio_fast(file_path, language_code, name="tmp"):
     # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
         GOOGLE_CLOUD_SPEECH_CREDENTIALS = f.read()
