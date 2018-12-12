@@ -51,13 +51,13 @@ python manage.py runserver
  
 ## Making API calls
 
-###Language CODE
+### Language CODE
 All of the following API calls require a language_code as a parameter to be passed in within the body.
 Find the correct language code from the following URL
 https://cloud.google.com/speech-to-text/docs/languages
 
 
-###API CALLS
+### API CALLS
  To transcribe an audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/transcribe
