@@ -2,10 +2,12 @@
 import json
 import io
 import os
+import binascii
 import tempfile
 from pydub import AudioSegment
 import speech_recognition as sr
 from multiprocessing.dummy import Pool
+
 
 from google.cloud import language
 from google.cloud.language import enums
@@ -183,9 +185,9 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     # This inner method will be run in a separate thread
     def transcribe(input):
         idx, value = input
-        # Reteive the chunck from the audio and store it in the tmp file
+        # Retreive the chunck from the audio and store it in the tmp file with a unique name
         sound_interval = sound[value[0]:value[1]]
-        audio_segment_path = os.path.join(tmp_path, name + str(idx) + ".wav")
+        audio_segment_path = os.path.join(tmp_path, name + str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
         out = sound_interval.export(audio_segment_path, format="wav")
 
         with sr.AudioFile(audio_segment_path) as source:
