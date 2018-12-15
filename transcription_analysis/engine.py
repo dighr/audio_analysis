@@ -18,7 +18,7 @@ from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
 
-from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, ResponseBean, TranscribedAudioBean
+from transcription_analysis.beans import ErrorBean, ResponseBean
 
 audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
@@ -79,9 +79,13 @@ def handle_audio_analysis_request(file_obj, language_code="en-US"):
     try:
         text = transcribe_any_audio(file_obj, language_code)
         # Do a sentiment analysis on the transcribed text
-        resp = get_text_sentiment_values(text)
+        text_analysis = get_text_sentiment_values(text)
         # return the answer in a JSON format
-        audio_bean = AnalyzedAudioBean(audio_text=text, audio_analysis=resp)
+        response = {
+            'audio_text': text,
+            'audio_analysis':  json.loads(text_analysis)
+        }
+        audio_bean = ResponseBean(response)
         # return the response as json
         return json.dumps(audio_bean.__dict__)
 
@@ -94,7 +98,12 @@ def handle_audio_transcription_request(file_obj, language_code="en-US"):
     try:
         text = transcribe_any_audio(file_obj, language_code)
         # return the answer in a JSON format
-        audio_text_bean = TranscribedAudioBean(file_obj.name, text)
+        response = {
+            'file_name': file_obj.name,
+            'audio_text':  text
+        }
+
+        audio_text_bean = ResponseBean(response)
         return json.dumps(audio_text_bean.__dict__)
     except Exception as e:
         return get_error_message(str(e))

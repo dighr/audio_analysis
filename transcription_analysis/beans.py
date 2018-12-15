@@ -1,26 +1,11 @@
 
 # This class acts a bean. Required to convert a python object into json
-import json
 
 
 class ResponseBean(object):
     def __init__(self, analysis={}):
         self.status = 1
         self.response = analysis
-
-
-class AnalyzedAudioBean(object):
-    def __init__(self, audio_text="", audio_analysis="{}"):
-        self.status = 1
-        self.audio_text = audio_text
-        self.audio_analysis = json.loads(audio_analysis)
-
-
-class TranscribedAudioBean(object):
-    def __init__(self, file_name, audio_text):
-        self.status = 1
-        self.file_name = file_name
-        self.audio_text = audio_text
 
 
 class ErrorBean(object):
