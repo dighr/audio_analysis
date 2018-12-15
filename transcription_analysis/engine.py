@@ -101,14 +101,16 @@ def convert_audio_to_wav(file):
         # Encoding Audio file into Wav
         if file_name.endswith('.mp3'):
             sound = AudioSegment.from_mp3(tempfn)
-            sound.export(file_path, format="wav")
+            out = sound.export(file_path, format="wav")
+            out.close()
         elif file_name.endswith('.ogg'):
             sound = AudioSegment.from_ogg(tempfn)
-            sound.export(file_path, format="wav")
+            out = sound.export(file_path, format="wav")
+            out.close()
         elif file_name.endswith('.wav'):
             sound = AudioSegment.from_wav(tempfn)
-            sound.export(file_path, format="wav")
-
+            out = sound.export(file_path, format="wav")
+            out.close()
         return file_path
     except:
         raise Exception("Problem with the input file %s" % file.name)
@@ -184,7 +186,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         # Reteive the chunck from the audio and store it in the tmp file
         sound_interval = sound[value[0]:value[1]]
         audio_segment_path = os.path.join(tmp_path, name + str(idx) + ".wav")
-        sound_interval.export(audio_segment_path, format="wav")
+        out = sound_interval.export(audio_segment_path, format="wav")
 
         with sr.AudioFile(audio_segment_path) as source:
             audio = r.record(source)
@@ -194,10 +196,11 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
             text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
         except sr.UnknownValueError:
             text = "*********sub audio was not understood*********"
-        # delete the file chunk
-        os.remove(audio_segment_path)
 
-        #
+        # Clear
+        os.remove(audio_segment_path)
+        out.close()
+
         return {
             "idx": idx,
             "text": text
