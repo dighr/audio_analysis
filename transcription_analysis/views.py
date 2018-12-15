@@ -8,7 +8,6 @@ import transcription_analysis.engine as engine
 # An audio file of "wav, MP3, or " format needs to be provided within the request
 class AudioAnalysisView(APIView):
     def post(self, request):
-        print ("Session ID: ", request.session.session_key)
         file = request.FILES.get("file")
         language_code = request.POST.get("language_code")
         response = engine.handle_audio_analysis_request(file, language_code)

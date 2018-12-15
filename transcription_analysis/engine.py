@@ -82,6 +82,9 @@ def transcribe_any_audio(file_obj, language_code):
             text = transcribe_short_audio(file_name, language_code=language_code)
         else:
             text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
+
+        # Remove file_name
+        os.remove(file_name)
         return text
     else:
         raise Exception("File was not provided or the provided file is not in the following format (WAV, MP3, OGG)")
@@ -99,7 +102,7 @@ def convert_audio_to_wav(file):
         for chunk in file.chunks():
             os.write(tempf, chunk)
 
-        file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] + ".wav")
+        file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] + str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
         # Encoding Audio file into Wav
         if file_name.endswith('.mp3'):
             sound = AudioSegment.from_mp3(tempfn)
