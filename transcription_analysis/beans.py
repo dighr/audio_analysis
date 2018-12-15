@@ -4,9 +4,9 @@ import json
 
 
 class ResponseBean(object):
-    def __init__(self, analysis="{}"):
+    def __init__(self, analysis={}):
         self.status = 1
-        self.response = json.loads(analysis)
+        self.response = analysis
 
 
 class AnalyzedAudioBean(object):

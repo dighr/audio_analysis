@@ -25,21 +25,35 @@ tmp_path = os.path.join('.', 'tmp')
 
 
 # given a text and a method, retreive the sentiment of that text using method modal
-def handle_text_analysis_request(text, method):
+def handle_text_analysis_request(text, source_language,  method):
 
     global value
-    if (text is not None) and (method is not None):
+    if (text is not None) and (method is not None) and (source_language is not None):
         if method == "google":
             try:
-                resp = get_text_sentiment_values(text)
-                text_bean = ResponseBean(resp)
+                text_to_analyze = text
+
+                if str(source_language).lower() != 'en':
+                    translated_text_obj = translate_text_from(text, source_language)
+                    text_to_analyze = translated_text_obj['translation']
+
+                text_analysis = get_text_sentiment_values(text_to_analyze)
+
+                response = {
+                    'text': text,
+                    'source_language': source_language,
+                    'translation': text_to_analyze,
+                    'text_analysis': json.loads(text_analysis)
+                }
+
+                text_bean = ResponseBean(response)
                 value = json.dumps(text_bean.__dict__)
             except Exception as e:
                 value = get_error_message(str(e))
         else:
             value = get_error_message("The method specified is not supported")
     else:
-        value = get_error_message("'text' and 'method' were not passed in the argument")
+        value = get_error_message("'text' or 'method' or 'source_language' were not passed in the argument")
 
     return value
 
@@ -50,7 +64,6 @@ def handle_translation_request(text, src_lang):
 
         try:
             resp = translate_text_from(text, src_lang)
-            print(resp)
             translation_bean = ResponseBean(resp)
             value = json.dumps(translation_bean.__dict__)
         except Exception as e:
@@ -250,7 +263,7 @@ def translate_text_from(text, source_language):
         'translation': translation['translatedText'],
     }
 
-    return json.dumps(response)
+    return response
 
 
 def get_text_sentiment_values(text):

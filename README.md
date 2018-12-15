@@ -74,7 +74,6 @@ Provide  both 'text' (text_to_be_translated) and 'source_language' (Explained ab
  http://localhost:PORT/text/translate
  ```
 
-
  To transcribe an audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/transcribe

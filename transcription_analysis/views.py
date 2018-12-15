@@ -20,7 +20,8 @@ class TextAnalysisView(APIView):
     def post(self, request):
         text = request.POST.get('text')
         method = request.POST.get('method')
-        response = engine.handle_text_analysis_request(text, method)
+        source_language = request.POST.get('source_language')
+        response = engine.handle_text_analysis_request(text, source_language, method)
         return HttpResponse(response, content_type="text/json")
 
 
