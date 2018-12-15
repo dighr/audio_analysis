@@ -74,13 +74,12 @@ def transcribe_any_audio(file_obj, language_code):
         # Get the duration of the audio file
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
+
         # Based on the duration, transcribe the audio files
         if duration < 60:
             text = transcribe_short_audio(file_name, language_code=language_code)
         else:
             text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
-        print("*********************************")
-        print(text)
         return text
     else:
         raise Exception("File was not provided or the provided file is not in the following format (WAV, MP3, OGG)")
@@ -179,7 +178,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         else:
             end = (end + interval)
 
-    # This inner method will be run in a separat thread
+    # This inner method will be run in a separate thread
     def transcribe(input):
         idx, value = input
         # Reteive the chunck from the audio and store it in the tmp file
@@ -194,8 +193,9 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         try:
             text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
         except sr.UnknownValueError:
-            text = "*********sub audio was not understood****************"
-        # delete
+            text = "*********sub audio was not understood*********"
+        # delete the file chunk
+        os.remove(audio_segment_path)
 
         #
         return {
