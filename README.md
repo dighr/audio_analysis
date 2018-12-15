@@ -52,12 +52,29 @@ python manage.py runserver
 ## Making API calls
 
 ### Language CODE
-All of the following API calls require a language_code as a parameter to be passed in within the body.
+The API calls to transcribe audios require a language_code as a parameter to be passed in within the body.
 Find the correct language code from the following URL
 https://cloud.google.com/speech-to-text/docs/languages
 
+### Text Languages
+Both 'text/analyze' and 'text/translate' API calls require 'source_language' as a parameter when making an API call. 
+Use the correct ISO-639-1 Code value for 'source_language' from the link below
+https://cloud.google.com/translate/docs/languages
 
 ### API CALLS
+To analyze a text, make a post request  to the following URL
+PASS in both text=text_to_be_analyzed and method=google into the body
+ ```
+ http://localhost:PORT/text/analyze
+ ```
+ 
+To translate a text, make a post request to the following URL
+Provide  both 'text' (text_to_be_translated) and 'source_language' (Explained above) as an input to make the translation
+ ```
+ http://localhost:PORT/text/translate
+ ```
+
+
  To transcribe an audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/transcribe
@@ -67,11 +84,6 @@ https://cloud.google.com/speech-to-text/docs/languages
 pass in the 'language_code' parameter into the body
 
 
-To analyze a text file, make a post request  to the following URL
-PASS in both text=text_to_be_analyzed and method=google into the body
- ```
- http://localhost:PORT/text/analyze
- ```
  To analyze an audio file, make a post request to the following URL
  ```
  http://localhost:PORT/audio/analyze
