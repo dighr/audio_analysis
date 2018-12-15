@@ -32,3 +32,12 @@ class TranscriptionView(APIView):
         language_code = request.POST.get("language_code")
         response = engine.handle_audio_transcription_request(file, language_code)
         return HttpResponse(response, content_type="text/json")
+
+
+# Handle Translation API call
+class TranslationView(APIView):
+    def post(self, request):
+        text = request.POST.get("text")
+        source_language = request.POST.get("source_language")
+        response = engine.handle_translation_request(text, source_language)
+        return HttpResponse(response, content_type="text/json")

@@ -13,11 +13,12 @@ from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
 from google.cloud import speech
+from google.cloud import translate
 from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
 
-from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, AnalyzedTextBean, TranscribedAudioBean
+from transcription_analysis.beans import ErrorBean, AnalyzedAudioBean, ResponseBean, TranscribedAudioBean
 
 audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
@@ -31,7 +32,7 @@ def handle_text_analysis_request(text, method):
         if method == "google":
             try:
                 resp = get_text_sentiment_values(text)
-                text_bean = AnalyzedTextBean(resp)
+                text_bean = ResponseBean(resp)
                 value = json.dumps(text_bean.__dict__)
             except Exception as e:
                 value = get_error_message(str(e))
@@ -39,6 +40,23 @@ def handle_text_analysis_request(text, method):
             value = get_error_message("The method specified is not supported")
     else:
         value = get_error_message("'text' and 'method' were not passed in the argument")
+
+    return value
+
+
+def handle_translation_request(text, src_lang):
+    global value
+    if (src_lang is not None) and (text is not None):
+
+        try:
+            resp = translate_text_from(text, src_lang)
+            print(resp)
+            translation_bean = ResponseBean(resp)
+            value = json.dumps(translation_bean.__dict__)
+        except Exception as e:
+            value = get_error_message(str(e))
+    else:
+        value = get_error_message("'text' and 'source_language' were not passed in the argument")
 
     return value
 
@@ -55,7 +73,6 @@ def handle_audio_analysis_request(file_obj, language_code="en-US"):
         return json.dumps(audio_bean.__dict__)
 
     except Exception as e:
-        raise e
         return get_error_message(str(e))
 
 
@@ -222,6 +239,18 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         transcript += t['text']
 
     return transcript
+
+
+def translate_text_from(text, source_language):
+    client = translate.Client()
+    translation = client.translate(text, source_language=source_language)
+    response = {
+        'source_language': source_language,
+        'text': text,
+        'translation': translation['translatedText'],
+    }
+
+    return json.dumps(response)
 
 
 def get_text_sentiment_values(text):

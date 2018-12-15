@@ -3,10 +3,10 @@
 import json
 
 
-class AnalyzedTextBean(object):
+class ResponseBean(object):
     def __init__(self, analysis="{}"):
         self.status = 1
-        self.analysis = json.loads(analysis)
+        self.response = json.loads(analysis)
 
 
 class AnalyzedAudioBean(object):

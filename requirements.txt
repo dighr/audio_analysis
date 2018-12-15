@@ -1,6 +1,7 @@
 Django==2.1.3
 google-cloud-language
 google-cloud-speech
+google-cloud-translate
 djangorestframework
 SpeechRecognition
 google-api-python-client
