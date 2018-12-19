@@ -25,23 +25,23 @@ tmp_path = os.path.join('.', 'tmp')
 
 
 # given a text and a method, retreive the sentiment of that text using method modal
-def handle_text_analysis_request(text, source_language,  method):
+def handle_text_analysis_request(text, language_code,  method):
 
     global value
-    if (text is not None) and (method is not None) and (source_language is not None):
+    if (text is not None) and (method is not None) and (language_code is not None):
         if method == "google":
             try:
                 text_to_analyze = text
 
-                if str(source_language).lower() != 'en':
-                    translated_text_obj = translate_text_from(text, source_language)
+                if str(language_code).lower() != 'en':
+                    translated_text_obj = translate_text_from(text, language_code)
                     text_to_analyze = translated_text_obj['translation']
 
                 text_analysis = get_text_sentiment_values(text_to_analyze)
 
                 response = {
                     'text': text,
-                    'source_language': source_language,
+                    'language_code': language_code,
                     'translation': text_to_analyze,
                     'text_analysis': json.loads(text_analysis)
                 }
@@ -58,18 +58,18 @@ def handle_text_analysis_request(text, source_language,  method):
     return value
 
 
-def handle_translation_request(text, src_lang):
+def handle_translation_request(text, language_code):
     global value
-    if (src_lang is not None) and (text is not None):
+    if (language_code is not None) and (text is not None):
 
         try:
-            resp = translate_text_from(text, src_lang)
+            resp = translate_text_from(text, str(language_code).split("-")[0])
             translation_bean = ResponseBean(resp)
             value = json.dumps(translation_bean.__dict__)
         except Exception as e:
             value = get_error_message(str(e))
     else:
-        value = get_error_message("'text' and 'source_language' were not passed in the argument")
+        value = get_error_message("'text' and 'language_code' were not passed in the argument")
 
     return value
 
@@ -77,15 +77,28 @@ def handle_translation_request(text, src_lang):
 # given a file on instance of UploadedFile, transcribe and analyze the audio
 def handle_audio_analysis_request(file_obj, language_code="en-US"):
     try:
+        # Transcribe
         text = transcribe_any_audio(file_obj, language_code)
+
+        # translate the text if language_code is not english
+        iso = str(language_code).split("-")[0]
+        translation = text
+        if iso.lower() != 'en':
+            translation = translate_text_from(text, iso.lower())['translation']
+
         # Do a sentiment analysis on the transcribed text
-        text_analysis = get_text_sentiment_values(text)
-        # return the answer in a JSON format
+        text_analysis = get_text_sentiment_values(translation)
+
+        # return the answers in a JSON format
         response = {
             'audio_text': text,
+            'translation': translation,
             'audio_analysis':  json.loads(text_analysis)
         }
+
+        # Create an success bean object
         audio_bean = ResponseBean(response)
+
         # return the response as json
         return json.dumps(audio_bean.__dict__)
 
@@ -96,11 +109,20 @@ def handle_audio_analysis_request(file_obj, language_code="en-US"):
 # given a file on instance of UploadedFile, transcribe the audio
 def handle_audio_transcription_request(file_obj, language_code="en-US"):
     try:
+        # Get the transcribed text
         text = transcribe_any_audio(file_obj, language_code)
+
+        # translate the text if language_code is not english
+        iso = str(language_code).split("-")[0]
+        translation = text
+        if iso.lower() != 'en':
+            translation = translate_text_from(text, iso.lower())['translation']
+
         # return the answer in a JSON format
         response = {
             'file_name': file_obj.name,
-            'audio_text':  text
+            'audio_text': text,
+            'translation': translation,
         }
 
         audio_text_bean = ResponseBean(response)

@@ -1,7 +1,7 @@
 
 # This class acts a bean. Required to convert a python object into json
 
-
+ 
 class ResponseBean(object):
     def __init__(self, analysis={}):
         self.status = 1

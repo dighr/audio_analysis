@@ -20,7 +20,7 @@ class TextAnalysisView(APIView):
     def post(self, request):
         text = request.POST.get('text')
         method = request.POST.get('method')
-        source_language = request.POST.get('source_language')
+        source_language = request.POST.get('language_code')
         response = engine.handle_text_analysis_request(text, source_language, method)
         return HttpResponse(response, content_type="text/json")
 
@@ -39,6 +39,6 @@ class TranscriptionView(APIView):
 class TranslationView(APIView):
     def post(self, request):
         text = request.POST.get("text")
-        source_language = request.POST.get("source_language")
+        source_language = request.POST.get("language_code")
         response = engine.handle_translation_request(text, source_language)
         return HttpResponse(response, content_type="text/json")
