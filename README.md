@@ -51,14 +51,14 @@ python manage.py runserver
  
 ## Making API calls
 
-### Language CODE
+### language_code for both 'audio/transcribe' and 'audio/analyze'
 The API calls to transcribe audios require a language_code as a parameter to be passed in within the body.
 Find the correct language code from the following URL
 https://cloud.google.com/speech-to-text/docs/languages
 
-### Text Languages
-Both 'text/analyze' and 'text/translate' API calls require 'source_language' as a parameter when making an API call. 
-Use the correct ISO-639-1 Code value for 'source_language' from the link below
+### language_code for both 'text/analyze' and text/translate'
+Both 'text/analyze' and 'text/translate' API also requires 'language_code' as a parameter when making an API call. 
+Use the correct ISO-639-1 Code value for 'language_code from the link below
 https://cloud.google.com/translate/docs/languages
 
 ### API CALLS
