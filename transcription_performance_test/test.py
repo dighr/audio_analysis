@@ -5,14 +5,13 @@ import glob
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-audio_folder_path1 = "/home/aljailaa/development/dataset/cv_corpus_v1/cv-valid-test/"
-audio_folder_path2 = "/home/aljailaa/development/dataset/cv_corpus_v1/"
-audio_transcription_excel = "/home/aljailaa/development/dataset/cv_corpus_v1/cv-valid-test.csv"
-audio_transcription_excel2 = "/home/aljailaa/development/dataset/cv_corpus_v1/cv-valid-dev.csv"
-transcription_path = "/home/aljailaa/development/pycharm/audio_analysis/audio_files/transcription/"
+audio_folder_path2 = "/development/dataset/cv_corpus_v1/"
+audio_transcription_excel = "/development/dataset/cv_corpus_v1/cv-valid-test.csv"
+audio_transcription_excel2 = "/development/dataset/cv_corpus_v1/cv-valid-dev.csv"
+transcription_path = "/development/pycharm/audio_analysis/audio_files/transcription/"
 
 
-# iterate over the test data and then combine all the audios which resides there into a large audio file with 1 seconds
+# iterate over the test data and then combine all the audios which resides there into a large audio file
 def combine_audios(audio_num, path, excel_file=audio_transcription_excel2, audio_folder_path=audio_folder_path2):
     # Get all the mp3 files in the audio_folder_path and store them in results. Sort them by name
     results = [os.path.basename(f) for f in glob.glob(os.path.join(audio_folder_path,"*.mp3"))]
@@ -46,7 +45,6 @@ def combine_audios(audio_num, path, excel_file=audio_transcription_excel2, audio
         # update
         second_of_silence = AudioSegment.silent(duration=100)
         combined_audio = combined_audio + second_of_silence + current_audio
-
 
 
 def generate_actual_transcription(num, excel_file, output_path):
@@ -97,21 +95,14 @@ def change_name(path, ext):
         os.rename(path + results[index], path + results[index].split("sample_")[1])
 
 
-def get_jaccard_sim(str1, str2):
-    # words1 = str1.split()
-    # words2 = str2.split()
-    #
-    # for index in range(len(words1)):
-    #     words1[index] = words1[index].lower()
-    #
-    # for index in range(len(words2)):
-    #     words2[index] = words2[index].lower()
-    #
-    # a = set(words1)
-    # b = set(words2)
-    # c = a.intersection(b)
-    # return float(len(c)) / (len(a) + len(b) - len(c))
-
+def get_similarity_score(str1, str2):
+    """
+    The common way of comparing similarity is to transform the texts into tf-idf vectors,
+    then the cosine similarity between both of the strings.
+     See https://towardsdatascience.com/overview-of-text-similarity-metrics-3397c4601f50
+    Tf-idf (and similar text transformations) are implemented in the Python packages Gensim and
+    scikit-learn. In our fuction, sickit-learn was used.
+    """
     documents = [str1, str2]
     tfidf = TfidfVectorizer().fit_transform(documents)
     # no need to normalize, since Vectorizer will return normalized tf-idf
@@ -135,12 +126,13 @@ def analyze_accuracy(path=transcription_path):
         with open(transcription_path + generated_path + results[index], 'r') as current_file:
             generated_text = current_file.read().replace('\n', '')
 
-        score += get_jaccard_sim(actual_text, generated_text)
-        print(index, results[index], get_jaccard_sim(actual_text, generated_text))
+        score += get_similarity_score(actual_text, generated_text)
+        print(index, results[index], get_similarity_score(actual_text, generated_text))
 
     return float(score / len(results))
 
 
+# transcribe all the audios
 def transcribe_audios2(file_path=audio_folder_path2, excel_file=audio_transcription_excel2):
     # Read the excel file
     excel = pd.read_csv(excel_file)
@@ -152,10 +144,10 @@ def transcribe_audios2(file_path=audio_folder_path2, excel_file=audio_transcript
     #     if excel_values[index][6] == "us" or excel_values[index][6] == "canada":
     #         audios[excel_values[index][0]] = excel_values[index][1]
 
-    for index in range(len(excel_values)):
+    for index in range(0, len(excel_values)):
         transcription = engine.transcribe_any_audio(file_path + excel_values[index][0], "en-US")
         actual = excel_values[index][1]
-        score = get_jaccard_sim(transcription, actual)
+        score = get_similarity_score(transcription, actual)
 
         print(index)
         print("actual: ", actual)
@@ -167,16 +159,34 @@ def transcribe_audios2(file_path=audio_folder_path2, excel_file=audio_transcript
 
         # Save regularly
         if index % 10 == 0:
-            excel.to_csv(file_path + "/output.csv")
+            excel.to_csv(file_path + "/cv-valid-dev.csv")
 
         # if result < 0.7:
         #     error.append(key)
 
-    excel.to_csv(file_path + "/output.csv")
+    excel.to_csv(file_path + "/cv-valid-dev.csv")
 
 
-# transcribe_audios2()
+def create_db_from_csv(excel_path=audio_folder_path2):
+    import csv
+    import sqlite3
 
+    con = sqlite3.Connection('output.sqlite')
+    cur = con.cursor()
+    cur.execute('drop table "transcription"')
+    cur.execute('CREATE TABLE "transcription" ("id" integer, "filename" text, "text" text, '
+                '"duration" real, "google_transcriptionUS" text, "similarityScore" real, '
+                '"up_votes" integer, "down_votes" integer, "age" text, "gender" text, "accent" text);')
+
+    f = open(excel_path + 'cv-valid-dev.csv')
+    csv_reader = csv.reader(f)
+
+    print (csv_reader)
+    cur.executemany('INSERT INTO transcription VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', csv_reader)
+    cur.close()
+    con.commit()
+    con.close()
+    f.close()
 
 
 # call only once
