@@ -5,14 +5,13 @@ import glob
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-audio_folder_path2 = "/development/dataset/cv_corpus_v1/"
-audio_transcription_excel = "/development/dataset/cv_corpus_v1/cv-valid-test.csv"
-audio_transcription_excel2 = "/development/dataset/cv_corpus_v1/cv-valid-dev.csv"
+audio_folder_path = "/development/dataset/cv_corpus_v1/"
+audio_transcription_excel = "/development/dataset/cv_corpus_v1/cv-valid-dev.csv"
 transcription_path = "/development/pycharm/audio_analysis/audio_files/transcription/"
 
 
 # iterate over the test data and then combine all the audios which resides there into a large audio file
-def combine_audios(audio_num, path, excel_file=audio_transcription_excel2, audio_folder_path=audio_folder_path2):
+def combine_audios(audio_num, path, excel_file=audio_transcription_excel, audio_folder_path=audio_folder_path):
     # Get all the mp3 files in the audio_folder_path and store them in results. Sort them by name
     results = [os.path.basename(f) for f in glob.glob(os.path.join(audio_folder_path,"*.mp3"))]
 
@@ -77,6 +76,7 @@ def generate_actual_transcription(num, excel_file, output_path):
         current_text += (" " + audios[audio_files[index]])
 
 
+# Transcribe audios and store them into the to folder path in a txt document
 def transcribe_audios(file_paths, to):
     # Get result from the engine transcription
     results = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths,'*.mp3'))]
@@ -112,7 +112,8 @@ def get_similarity_score(str1, str2):
     return (pairwise_similarity[1, 0] + pairwise_similarity[0, 1]) / 2
 
 
-def analyze_accuracy(path=transcription_path):
+# analyze accuracy of transcribed txt and actual transcription
+def analyze_accuracy():
     actual_path = "/actual/short/us+canada/"
     generated_path = "/generated/short/us+canada/"
 
@@ -132,17 +133,33 @@ def analyze_accuracy(path=transcription_path):
     return float(score / len(results))
 
 
-# transcribe all the audios
-def transcribe_audios2(file_path=audio_folder_path2, excel_file=audio_transcription_excel2):
+def create_db_from_csv(excel_path=audio_folder_path):
+    import csv
+    import sqlite3
+
+    con = sqlite3.Connection('output.sqlite')
+    cur = con.cursor()
+    cur.execute('drop table "transcription"')
+    cur.execute('CREATE TABLE "transcription" ("id" integer, "filename" text, "text" text, '
+                '"duration" real, "google_transcriptionUS" text, "similarityScore" real, '
+                '"up_votes" integer, "down_votes" integer, "age" text, "gender" text, "accent" text);')
+
+    f = open(excel_path + 'cv-valid-dev.csv')
+    csv_reader = csv.reader(f)
+
+    print (csv_reader)
+    cur.executemany('INSERT INTO transcription VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', csv_reader)
+    cur.close()
+    con.commit()
+    con.close()
+    f.close()
+
+
+# transcribe all the audios using the en-US modal
+def transcribe_audios2(file_path=audio_folder_path, excel_file=audio_transcription_excel):
     # Read the excel file
     excel = pd.read_csv(excel_file)
     excel_values = excel.values
-
-    # get the files names of audios with only english or canadian accent
-    # for index in range(2):
-    #
-    #     if excel_values[index][6] == "us" or excel_values[index][6] == "canada":
-    #         audios[excel_values[index][0]] = excel_values[index][1]
 
     for index in range(0, len(excel_values)):
         transcription = engine.transcribe_any_audio(file_path + excel_values[index][0], "en-US")
@@ -167,44 +184,80 @@ def transcribe_audios2(file_path=audio_folder_path2, excel_file=audio_transcript
     excel.to_csv(file_path + "/cv-valid-dev.csv")
 
 
-def create_db_from_csv(excel_path=audio_folder_path2):
-    import csv
-    import sqlite3
+# transcribe and calculate the word error rate for audios with blank transcription within the US transcription
+def transcribe_audios_that_were_not_transcribed(file_path=audio_folder_path):
+    from jiwer import wer
+    import math
+    # Read the excel file
+    excel = pd.read_csv("./updated_cv_valid_dev.csv", dtype='str')
+    excel_values = excel.values
+    counter = 0
 
-    con = sqlite3.Connection('output.sqlite')
-    cur = con.cursor()
-    cur.execute('drop table "transcription"')
-    cur.execute('CREATE TABLE "transcription" ("id" integer, "filename" text, "text" text, '
-                '"duration" real, "google_transcriptionUS" text, "similarityScore" real, '
-                '"up_votes" integer, "down_votes" integer, "age" text, "gender" text, "accent" text);')
+    # get the files names of audios with only english or canadian accent
+    for index in range(0, len(excel_values)):
+        accent = excel.at[index, 'google_transcriptionUS']
+        if type(accent) != str and math.isnan(accent):
+            actual = excel.at[index, 'text']
+            transcription = engine.transcribe_any_audio(file_path + excel.at[index, 'filename'], 'en_IN')
+            score = get_similarity_score(actual, transcription)
+            error = wer(str(actual), str(transcription))
+            # Display
+            print(counter, excel.at[index, 'filename'])
+            print("actual: ", actual)
+            print("generated: ", transcription)
+            print(score, 1 - error)
+            # Store
+            excel.at[index, 'similarityScore_india'] = str(score)
+            excel.at[index, 'word_error_rate_india'] = str(1 - error)
+            excel.at[index, 'google_transcriptionIndia'] = transcription
 
-    f = open(excel_path + 'cv-valid-dev.csv')
-    csv_reader = csv.reader(f)
+            # Regularly Save
+            if counter % 10 == 0:
+                excel.to_csv("output.csv")
+            counter = counter + 1
 
-    print (csv_reader)
-    cur.executemany('INSERT INTO transcription VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', csv_reader)
-    cur.close()
-    con.commit()
-    con.close()
-    f.close()
-
-
-# call only once
-# generate short audio files and store them in the short folder
-# combine_audios(6, "../audio_files/short/us+canada/")
-# generate long audio files and store them in the long folder
-# combine_audios(100, "../audio_files/long/us+canada/")
-# generate the actual output
-# generate Actual Transcription for the short audios
-# enerate_actual_transcription(6, audio_transcription_excel2, "../audio_files/transcription/actual/short/us+canada/")
-# generate actual transcription for the long audios
-# generate_actual_transcription(100, audio_transcription_excel2, "../audio_files/transcription/actual/long/us+canada/")
-# transcribe short audios
-# transcribe_audios("../audio_files/short/us+canada/", to="../audio_files/transcription/generated/short/us+canada/")
-
-
-# change_name("../audio_files/long/", "*.mp3")
+        excel.to_csv("output.csv")
 
 
+# transcribe and calculate the word error rate
+def transcribe_audios_using_their_accent_modal(accent, modal_code, file_path=audio_folder_path):
+    from jiwer import wer
+    # Read the excel file
+    excel = pd.read_csv("./updated_cv_valid_dev.csv", dtype='str')
+
+    excel_values = excel.values
+    counter = 0
+    # get the files names of audios with only english or canadian accent
+    for index in range(0, len(excel_values)):
+        actual_accent = excel.at[index, 'accent']
+        if actual_accent == accent:
+            actual = excel.at[index, 'text']
+            transcription = engine.transcribe_any_audio(file_path + excel.at[index, 'filename'], modal_code)
+
+            score = get_similarity_score(actual, transcription)
+            error = wer(str(actual), str(transcription))
+            # display
+            print(counter, excel.at[index, 'filename'])
+            print("actual: ", actual)
+            print("generated: ", transcription)
+            print(score, 1 - error)
+            # Store
+            excel.at[index, 'similarityScore_india'] = str(score)
+            excel.at[index, 'word_error_rate_india'] = str(1 - error)
+            excel.at[index, 'google_transcriptionIndia'] = transcription
+
+            # Regularly save
+            if counter % 10 == 0:
+                excel.to_csv("output.csv")
+            counter = counter + 1
+
+    excel.to_csv("output.csv")
+
+
+def transcribe_using_deep_speech():
+    pass
+
+
+transcribe_audios_that_were_not_transcribed()
 
 

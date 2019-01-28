@@ -20,7 +20,7 @@ from google.protobuf.json_format import MessageToJson
 
 from transcription_analysis.beans import ErrorBean, ResponseBean
 
-audio_directory_path = os.path.join('.', 'audio_files')
+audio_directory_path = os.path.join(os.pardir, 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
 
 
@@ -142,7 +142,7 @@ def transcribe_any_audio(file_obj, language_code):
         if duration < 60:
             text = transcribe_short_audio(file_name, language_code=language_code)
         else:
-            text = transcribe_audio_fast(file_name, name=file_obj.name, language_code=language_code)
+            text = transcribe_audio_fast(file_name, language_code=language_code)
 
         # Remove file_name
         os.remove(file_name)
@@ -156,34 +156,34 @@ def convert_audio_to_wav(file):
     if file is None:
         return
 
-    file_name = file.name
-    tempf, tempfn = tempfile.mkstemp()
-
-    try:
+    if type(file) == str:
+        file_name = str(file).split("/")[-1]
+        tempfn = file
+    else:
+        file_name = file.name
+        tempf, tempfn = tempfile.mkstemp()
         for chunk in file.chunks():
-            os.write(tempf, chunk)
-
-        file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] + str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
-        # Encoding Audio file into Wav
-        if file_name.endswith('.mp3'):
-            sound = AudioSegment.from_mp3(tempfn)
-            out = sound.export(file_path, format="wav")
-            out.close()
-        elif file_name.endswith('.ogg'):
-            sound = AudioSegment.from_ogg(tempfn)
-            out = sound.export(file_path, format="wav")
-            out.close()
-        elif file_name.endswith('.wav'):
-            sound = AudioSegment.from_wav(tempfn)
-            out = sound.export(file_path, format="wav")
-            out.close()
-        return file_path
-    except:
-        raise Exception("Problem with the input file %s" % file.name)
-    finally:
+                os.write(tempf, chunk)
         os.close(tempf)
 
-    return None
+    file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] +
+                             str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
+    # Encoding Audio file into Wav
+    if file_name.endswith('.mp3'):
+        sound = AudioSegment.from_mp3(tempfn)
+        out = sound.export(file_path, format="wav")
+        out.close()
+    elif file_name.endswith('.ogg'):
+        sound = AudioSegment.from_ogg(tempfn)
+        out = sound.export(file_path, format="wav")
+        out.close()
+    elif file_name.endswith('.wav'):
+        sound = AudioSegment.from_wav(tempfn)
+        out = sound.export(file_path, format="wav")
+        out.close()
+    return file_path
+    # except:
+    #     raise Exception("Problem with the input file %s" % file.name)
 
 
 # trascribe audios less than one minute with wav format
@@ -214,6 +214,10 @@ def transcribe_short_audio(file_path, language_code):
 # Transcribe audio with any length, the way this is done is by first, dividing the audio file into smalled chucks
 # of 45 seconds, each chuck is transcribed in a separate thread and then assembled in an ordered way at the end
 def transcribe_audio_fast(file_path, language_code, name="tmp"):
+    # Since tmp_file is required, create it if it does not exist
+    if not os.path.exists(tmp_path):
+        os.makedirs(tmp_path)
+
     # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
         GOOGLE_CLOUD_SPEECH_CREDENTIALS = f.read()
@@ -228,7 +232,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     # Calculate the voice chucks in miliseconds in the following format (chuck_begin, chuck_end)
     # Append this into the data list
     duration = sound.duration_seconds * 1000
-    interval = 45 * 1000
+    interval = 58 * 1000
     begin = 0
     if interval < duration:
         end = interval
@@ -252,14 +256,16 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         # Retreive the chunck from the audio and store it in the tmp file with a unique name
         sound_interval = sound[value[0]:value[1]]
         audio_segment_path = os.path.join(tmp_path, name + str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
+
         out = sound_interval.export(audio_segment_path, format="wav")
 
-        with sr.AudioFile(audio_segment_path) as source:
-            audio = r.record(source)
+        # with sr.AudioFile(audio_segment_path) as source:
+        #     audio = r.record(source)
 
         # Transcribe audio file
         try:
-            text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+            # text = r.recognize_google_cloud(audio, language=language_code, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+            text = transcribe_short_audio(audio_segment_path, language_code)
         except sr.UnknownValueError:
             text = "*********sub audio was not understood*********"
 
