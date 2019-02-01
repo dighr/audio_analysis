@@ -1,26 +1,25 @@
 # Imports the Google Cloud client library
-import json
-import io
-import os
 import binascii
+import io
+import json
+import os
 import tempfile
-from pydub import AudioSegment
-import speech_recognition as sr
 from multiprocessing.dummy import Pool
 
-
+import speech_recognition as sr
 from google.cloud import language
-from google.cloud.language import enums
-from google.cloud.language import types
 from google.cloud import speech
 from google.cloud import translate
+from google.cloud.language import enums
+from google.cloud.language import types
 from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.protobuf.json_format import MessageToJson
+from pydub import AudioSegment
 
 from transcription_analysis.beans import ErrorBean, ResponseBean
 
-audio_directory_path = os.path.join(os.pardir, 'audio_files')
+audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
 
 
