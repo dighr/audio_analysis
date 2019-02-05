@@ -1,9 +1,13 @@
-from pydub import AudioSegment
-from transcription_analysis import engine
-import os
 import glob
+import math
+import os
+
 import pandas as pd
+from jiwer import wer
+from pydub import AudioSegment
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+from transcription_analysis import engine
 
 audio_folder_path = "/development/dataset/cv_corpus_v1/"
 audio_transcription_excel = "/development/dataset/cv_corpus_v1/cv-valid-dev.csv"
@@ -77,16 +81,29 @@ def generate_actual_transcription(num, excel_file, output_path):
 
 
 # Transcribe audios and store them into the to folder path in a txt document
-def transcribe_audios(file_paths, to):
+def transcribe_audios(file_paths, format="mp3", modal_code="en-US"):
     # Get result from the engine transcription
-    results = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths,'*.mp3'))]
-    results.sort()
+    audio_files = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
+    audio_files.sort()
 
-    for index in range(len(results)):
-        transcription = engine.transcribe_any_audio(file_paths + results[index], "en-US")
-        parts = results[index].split(".")
-        with open(to + parts[0] + ".txt", "w") as text_file:
-            text_file.write(transcription)
+    transcription_output = []
+    translation_output = []
+    files = []
+    for index in range(len(audio_files)):
+        transcription = engine.transcribe_any_audio(file_paths + audio_files[index], modal_code)
+        transcription_output.append(transcription)
+        translation = engine.translate_text_from(transcription, "ar")
+        translation_output.append(translation['translation'])
+        files.append(audio_files[index].split(format)[0])
+
+        print(audio_files[index], transcription, translation['translation'])
+
+    output_dictionary = {"files": files,
+                         "transcription_" + modal_code: transcription_output,
+                         "translation_" + modal_code: translation_output
+                         }
+    df = pd.DataFrame(data=output_dictionary)
+    df.to_csv("transcription_output_" + modal_code + ".csv")
 
 
 def change_name(path, ext):
@@ -186,8 +203,7 @@ def transcribe_audios2(file_path=audio_folder_path, excel_file=audio_transcripti
 
 # transcribe and calculate the word error rate for audios with blank transcription within the US transcription
 def transcribe_audios_that_were_not_transcribed(file_path=audio_folder_path):
-    from jiwer import wer
-    import math
+
     # Read the excel file
     excel = pd.read_csv("./updated_cv_valid_dev.csv", dtype='str')
     excel_values = excel.values
@@ -258,6 +274,27 @@ def transcribe_using_deep_speech():
     pass
 
 
-transcribe_audios_that_were_not_transcribed()
+# transcribe all the audios using the en-US modal
+def add_scores_into_csv(excel_file, actual_col, generated_col):
+    # Read the excel file
+    excel = pd.read_csv(excel_file)
+    excel_values = excel.values
 
+    for index in range(0, len(excel_values)):
+        actual = excel.at[index, actual_col]
+        generated = excel.at[index, generated_col]
 
+        score = get_similarity_score(str(actual), str(generated))
+        excel.at[index, "word_error_rate"] = score
+
+        print("actual: ", actual)
+        print("generated: ", generated)
+        print(score)
+
+    excel.to_csv(excel_file)
+
+# path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
+# add_scores_into_csv(path + "transcription_output_ar-KW.csv", "actual_translation", "translation_ar-KW")
+
+# transcribe_using_deep_speech()
+# transcribe_audios("/home/ameen/development/dataset/arabic_audio/", format="wav", modal_code="ar-IQ")
