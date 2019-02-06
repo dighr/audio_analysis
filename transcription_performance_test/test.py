@@ -80,32 +80,6 @@ def generate_actual_transcription(num, excel_file, output_path):
         current_text += (" " + audios[audio_files[index]])
 
 
-# Transcribe audios and store them into the to folder path in a txt document
-def transcribe_audios(file_paths, format="mp3", modal_code="en-US"):
-    # Get result from the engine transcription
-    audio_files = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
-    audio_files.sort()
-
-    transcription_output = []
-    translation_output = []
-    files = []
-    for index in range(len(audio_files)):
-        transcription = engine.transcribe_any_audio(file_paths + audio_files[index], modal_code)
-        transcription_output.append(transcription)
-        translation = engine.translate_text_from(transcription, "ar")
-        translation_output.append(translation['translation'])
-        files.append(audio_files[index].split(format)[0])
-
-        print(audio_files[index], transcription, translation['translation'])
-
-    output_dictionary = {"files": files,
-                         "transcription_" + modal_code: transcription_output,
-                         "translation_" + modal_code: translation_output
-                         }
-    df = pd.DataFrame(data=output_dictionary)
-    df.to_csv("transcription_output_" + modal_code + ".csv")
-
-
 def change_name(path, ext):
     results = [os.path.basename(f) for f in glob.glob(os.path.join(path, ext))]
     for index in range(len(results)):
@@ -145,7 +119,8 @@ def analyze_accuracy():
             generated_text = current_file.read().replace('\n', '')
 
         score += get_similarity_score(actual_text, generated_text)
-        print(index, results[index], get_similarity_score(actual_text, generated_text))
+        print(index, results[index], get_similarity_score(str(actual_text).split(),
+                                                          generated_text).split())
 
     return float(score / len(results))
 
@@ -274,6 +249,49 @@ def transcribe_using_deep_speech():
     pass
 
 
+# Transcribe audios and translate file. Store the result into a csv file
+def transcribe_audios(file_paths, format="mp3", modal_code="en-US"):
+    # Get result from the engine transcription
+    audio_files = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
+    audio_files.sort()
+
+    transcription_output = []
+    translation_output = []
+    files = []
+    for index in range(len(audio_files)):
+        transcription = engine.transcribe_any_audio(file_paths + audio_files[index], modal_code)
+        transcription_output.append(transcription)
+        translation = engine.translate_text_from(transcription, modal_code.split("-")[0])
+        translation_output.append(translation['translation'])
+        files.append(audio_files[index].split(format)[0])
+
+        print(audio_files[index], transcription, translation['translation'])
+
+    output_dictionary = {"files": files,
+                         "transcription_" + modal_code: transcription_output,
+                         "translation_" + modal_code: translation_output
+                         }
+    df = pd.DataFrame(data=output_dictionary)
+    df.to_csv("transcription_output_" + modal_code + ".csv")
+
+
+def pre_process_arabic_string(str):
+    from lang_trans.arabic import buckwalter
+    import re
+    # Remove all non alphabitic symbols
+    output = buckwalter.trans(re.sub(r'([^\s\w]|_)+', '', str))
+    # Remove all symbols
+    reg = re.compile('[aui~oFNK]')
+    output = reg.sub('', output)
+
+    # Replace different shapes of alf into a single one
+    reg = re.compile('[|><]')
+    output = reg.sub('A', output)
+
+    # Convert the string back
+    return buckwalter.untrans(output)
+
+
 # transcribe all the audios using the en-US modal
 def add_scores_into_csv(excel_file, actual_col, generated_col):
     # Read the excel file
@@ -281,20 +299,23 @@ def add_scores_into_csv(excel_file, actual_col, generated_col):
     excel_values = excel.values
 
     for index in range(0, len(excel_values)):
-        actual = excel.at[index, actual_col]
-        generated = excel.at[index, generated_col]
+        actual = pre_process_arabic_string(excel.at[index, actual_col])
+        generated = pre_process_arabic_string(excel.at[index, generated_col])
 
-        score = get_similarity_score(str(actual), str(generated))
-        excel.at[index, "word_error_rate"] = score
+        # score = get_similarity_score(str(actual), str(generated))
+        word_er = wer(str(actual), str(generated))
+        word_er = 1 if word_er > 1 else word_er
+        excel.at[index, "word_error_rate"] = 1 - word_er
 
         print("actual: ", actual)
         print("generated: ", generated)
-        print(score)
+        print(1 - word_er)
 
     excel.to_csv(excel_file)
 
-# path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
-# add_scores_into_csv(path + "transcription_output_ar-KW.csv", "actual_translation", "translation_ar-KW")
 
-# transcribe_using_deep_speech()
-# transcribe_audios("/home/ameen/development/dataset/arabic_audio/", format="wav", modal_code="ar-IQ")
+path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
+add_scores_into_csv(path + "transcription_output_ar-QA.csv", "actual_text", "transcription_ar-QA")
+
+transcribe_using_deep_speech()
+# transcribe_audios("/home/ameen/development/dataset/arabic_audio/", format="wav", modal_code="ar-QA")

@@ -18,3 +18,4 @@ xlrd
 sklearn
 deepspeech==0.4.1
 jiwer
+lang-trans
