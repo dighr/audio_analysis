@@ -284,6 +284,16 @@ def pre_process_arabic_string(str):
     reg = re.compile('[aui~oFNK]')
     output = reg.sub('', output)
 
+    # remove the space before single letter
+    output = output.replace(" w ", " w")
+    output = output.replace("w ", "w")
+
+    # replace ta marbootah with ha
+    output = output.replace("p", "h")
+
+    # replace alif at the end
+    output = output.replace("a ", "")
+
     # Replace different shapes of alf into a single one
     reg = re.compile('[|><]')
     output = reg.sub('A', output)
@@ -314,8 +324,77 @@ def add_scores_into_csv(excel_file, actual_col, generated_col):
     excel.to_csv(excel_file)
 
 
-path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
-add_scores_into_csv(path + "transcription_output_ar-QA.csv", "actual_text", "transcription_ar-QA")
+# transcribe all the audios using the en-US modal
+def transcribe_arabic(audio_file_path, transcription_file_path,
+                      audio_format='wav', trans_format="lab", modal_code="ar-OM"):
+    from lang_trans.arabic import buckwalter
 
-transcribe_using_deep_speech()
+    # Read the excel file
+    audio_files = [os.path.basename(f)
+                   for f in glob.glob(os.path.join(audio_file_path, '*.' + audio_format))]
+    transcription_files = [os.path.basename(f)
+                           for f in glob.glob(os.path.join(transcription_file_path, '*.' + trans_format))]
+
+    audio_files.sort()
+    transcription_files.sort()
+
+    audios = []
+    actual_trans = []
+    generated_trans = []
+    scores = []
+
+    for index in range(0, len(audio_files)):
+        audio_file = audio_files[index]
+        audios.append(audio_file)
+
+        transcription = engine.transcribe_any_audio(audio_file_path + audio_file, modal_code)
+        transcription = pre_process_arabic_string(transcription)
+        generated_trans.append(transcription)
+
+        with open(transcription_file_path + transcription_files[index], 'r') as file:
+            actual = file.read().replace('\n', '')
+
+        actual = buckwalter.untrans(actual)
+        actual = pre_process_arabic_string(actual)
+        actual_trans.append(actual)
+
+        word_er = wer(buckwalter.trans(actual), buckwalter.trans(transcription))
+        word_er = 1 if word_er > 1 else word_er
+        scores.append(1 - word_er)
+
+        # Save Regularly
+        if index % 10 == 0:
+            output_dictionary = {"audio files": audios,
+                                 "actual": actual_trans,
+                                 "generated": generated_trans,
+                                 "scores": scores
+                                 }
+
+            df = pd.DataFrame(data=output_dictionary)
+            df.to_csv("transcription_output.csv")
+
+        print(audio_file, transcription_files[index])
+        print("actual: ", actual)
+        print("generated: ", transcription)
+        print("score", word_er)
+
+    output_dictionary = {"audio files": audios,
+                         "actual": actual_trans,
+                         "generated": generated_trans,
+                         "scores": scores
+                         }
+
+    df = pd.DataFrame(data=output_dictionary)
+    df.to_csv("transcription_output.csv")
+
+#
+# path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
+# add_scores_into_csv(path + "transcription_output1.csv", "actual", "generated")
+#
+
+# audio_file_path = "/home/ameen/development/dataset/arabic-speech-corpus/wav/"
+# transcription_file_path = "/home/ameen/development/dataset/arabic-speech-corpus/lab/"
+# transcribe_arabic(audio_file_path, transcription_file_path)
+
+# transcribe_using_deep_speech()
 # transcribe_audios("/home/ameen/development/dataset/arabic_audio/", format="wav", modal_code="ar-QA")
