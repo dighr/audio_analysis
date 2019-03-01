@@ -22,7 +22,6 @@ from transcription_analysis.beans import ErrorBean, ResponseBean
 audio_directory_path = os.path.join('.', 'audio_files')
 tmp_path = os.path.join('.', 'tmp')
 
-
 # given a text and a method, retreive the sentiment of that text using method modal
 def handle_text_analysis_request(text, language_code,  method):
 
@@ -130,10 +129,14 @@ def handle_audio_transcription_request(file_obj, language_code="en-US"):
         return get_error_message(str(e))
 
 
-def transcribe_any_audio(file_obj, language_code):
+def transcribe_any_audio(file_obj, language_code, type="google"):
     file_name = convert_audio_to_wav(file_obj)
-    if file_name is not None:
-        # Get the duration of the audio file
+    if file_name is None:
+        raise Exception("File was not provided or the provided file is not in the following"
+                        " format (WAV, MP3, OGG)")
+
+    # Get the duration of the audio file
+    if type == "google":
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
 
@@ -142,16 +145,19 @@ def transcribe_any_audio(file_obj, language_code):
             text = transcribe_short_audio(file_name, language_code=language_code)
         else:
             text = transcribe_audio_fast(file_name, language_code=language_code)
+    elif type == "deepspeech":
+        from transcription_analysis import deepspeech
+        ds = deepspeech.DeepSpeech()
+        text = ds.transcribe(file_name)
 
-        # Remove file_name
-        os.remove(file_name)
-        return text
-    else:
-        raise Exception("File was not provided or the provided file is not in the following format (WAV, MP3, OGG)")
+    # Remove file_name
+    os.remove(file_name)
+    return text
+
 
 
 # Convert the uploaded audio file to wav if they are not and store them under the audio files folder
-def convert_audio_to_wav(file):
+def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True):
     if file is None:
         return
 
@@ -165,8 +171,10 @@ def convert_audio_to_wav(file):
                 os.write(tempf, chunk)
         os.close(tempf)
 
-    file_path = os.path.join(audio_directory_path, os.path.splitext(file_name)[0] +
-                             str(binascii.hexlify(os.urandom(32)).decode()) + ".wav")
+    id = ""
+    if add_id:
+        id = str(binascii.hexlify(os.urandom(32)).decode())
+    file_path = os.path.join(audio_directory, os.path.splitext(file_name)[0] + id + ".wav")
     # Encoding Audio file into Wav
     if file_name.endswith('.mp3'):
         sound = AudioSegment.from_mp3(tempfn)
@@ -290,9 +298,10 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     return transcript
 
 
-def translate_text_from(text, source_language):
+def translate_text_from(text, source_language, target_language="en"):
     client = translate.Client()
-    translation = client.translate(text, source_language=source_language)
+    translation = client.translate(text,
+                                   source_language=source_language, target_language=target_language)
     response = {
         'source_language': source_language,
         'text': text,

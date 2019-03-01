@@ -79,33 +79,34 @@ def prepare_audio(audio_path):
 
 
 class DeepSpeech:
-    def __init__(self, modal_path="models/output_graph.pbmm",
-                 alphabet_path="models/alphabet.txt",
-                 lm_path="models/lm.binary",
-                 trie_path="models/trie"):
+    ds = None
+
+    def __init__(self, modal_path="../models/output_graph.pbmm",
+                 alphabet_path="../models/alphabet.txt",
+                 lm_path="../models/lm.binary",
+                 trie_path="../models/trie"):
         self.modal_path = modal_path
         self.alphabet_path = alphabet_path
         self.lm_path = lm_path
         self.trie_path = trie_path
-        self.ds = None
 
     def load_modal(self):
         print('Loading model from file {}'.format(self.modal_path), file=sys.stderr)
         model_load_start = timer()
-        self.ds = Model(self.modal_path, N_FEATURES, N_CONTEXT, self.alphabet_path, BEAM_WIDTH)
+        DeepSpeech.ds = Model(self.modal_path, N_FEATURES, N_CONTEXT, self.alphabet_path, BEAM_WIDTH)
         model_load_end = timer() - model_load_start
         print('Loaded model in {:.3}s.'.format(model_load_end), file=sys.stderr)
 
         if self.lm_path and self.trie_path:
             print('Loading language model from files {} {}'.format(self.lm_path, self.trie_path), file=sys.stderr)
             lm_load_start = timer()
-            self.ds.enableDecoderWithLM(self.alphabet_path, self.lm_path, self.trie_path, LM_ALPHA, LM_BETA)
+            DeepSpeech.ds.enableDecoderWithLM(self.alphabet_path, self.lm_path, self.trie_path, LM_ALPHA, LM_BETA)
             lm_load_end = timer() - lm_load_start
             print('Loaded language model in {:.3}s.'.format(lm_load_end), file=sys.stderr)
 
     def transcribe(self, audio_path):
         # Load modal if not loaded yet
-        if not self.ds:
+        if not DeepSpeech.ds:
             self.load_modal()
 
         # Transcribe
@@ -117,7 +118,6 @@ class DeepSpeech:
         print('Inference took %0.3fs for %0.3fs audio file.' % (inference_end, audio_length), file=sys.stderr)
         return transcription
 
-
-ds = DeepSpeech()
-ds.load_modal()
-ds.transcribe()
+# ds = DeepSpeech()
+# ds.load_modal()
+# ds.transcribe()
