@@ -21,3 +21,5 @@ jiwer
 lang-trans
 deepspeech
 jiwer
+azure-cognitiveservices-speech
+watson-developer-cloud
