@@ -1,5 +1,7 @@
 ## Content
-This folder contains the transcription results of an arabic dataset obtained from Azure and google's transcription API
+This folder contains the transcription results of an arabic dataset obtained using the following API
+    - Azure
+    - google
 
 ## Dataset 
 This dataset is obtained from the University of oxford text archive
@@ -34,3 +36,21 @@ automatically saved
   this folder will be used as a temporary location to automatically convert the audio files into wav
 - For deepspeech, the open source modal (around 4 GB) should be downloaded and added into the parent directory of the project
 
+## Scores
+The scores were calculated by following the below procedures
+   - Every actual and generated results were preprocessed before calculating their scores (implementation is under
+    the method "pre_process_arabic_string" in the "test.py")
+       * Each arabic sentence is converted into english chars using the buckwalter transliteration 
+       * From the converted string, symbols that do not change the meaning of the sentence were removed from the file
+       * Other suggested pre-processing were performed like removing extras paces were performed (Can be looked at from the implementation)
+       
+   - The sentence similarity results reported within each file use two different methods
+      * Word Error Rate (WER): *The value shown with the csv files are 1 - WER" which identify similarity rather than error
+          - The following python package was used to calculate WER: 
+          - For more info about(WER): https://en.wikipedia.org/wiki/Word_error_rate 
+      * Similarity Score: 
+          - The scores were calculated using suggestion from the following median article
+                https://towardsdatascience.com/overview-of-text-similarity-metrics-3397c4601f50
+          - The implemetation "get_similarity_scores" is under the test.py file
+          - In all the expirements made, this method reported less scores than (1 - WER)
+       
