@@ -41,18 +41,19 @@ def get_similarity_score(str1, str2):
 # Transcribe audios and translate file. Store the result into a csv file
 def transcribe_audios(file_paths, format="mp3", modal_code="en-US", type="deepspeech"):
     # Get result from the engine transcription
-    audio_files = [os.path.basename(f) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
+    audio_files = [(file_paths + os.path.basename(f)) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
     audio_files.sort()
+    transcribe_audios_from_list(audio_files, format, modal_code, type)
 
+def transcribe_audios_from_list(audio_files, format, modal_code, type):
+    # Get result from the engine transcription
     transcription_output = []
     translation_output = []
     files = []
     for index in range(len(audio_files)):
-        if type == "deepspeech":
-            transcription = engine.transcribe_any_audio(file_paths + audio_files[index],
-                                                        modal_code, type="deepspeech")
-        elif type == "google":
-            transcription = engine.transcribe_any_audio(file_paths + audio_files[index], modal_code)
+
+        transcription = engine.transcribe_any_audio(audio_files[index],
+                                                        modal_code, type=type)
 
         files.append(audio_files[index].split(format)[0])
         transcription_output.append(transcription)
@@ -75,7 +76,6 @@ def transcribe_audios(file_paths, format="mp3", modal_code="en-US", type="deepsp
                          }
     df = pd.DataFrame(data=output_dictionary)
     df.to_csv(type + "_transcription_output_" + modal_code + ".csv")
-
 
 def pre_process_arabic_string(str):
 
@@ -108,7 +108,7 @@ def pre_process_arabic_string(str):
 # transcribe all the audios using the en-US modal
 def add_scores_into_csv(excel_file, actual_col, generated_col, arabic=True):
     # Read the excel file
-    excel = pd.read_csv(excel_file)
+    excel = pd.read_csv(excel_file, encoding="ISO-8859-1")
     excel_values = excel.values
 
     for index in range(0, len(excel_values)):
@@ -130,7 +130,8 @@ def add_scores_into_csv(excel_file, actual_col, generated_col, arabic=True):
 
 # transcribe all the audios using the en-US modal
 def transcribe_arabic(audio_file_path, transcription_file_path,
-                      audio_format='wav', trans_format="lab", modal_code="ar-OM"):
+                      audio_format='wav', trans_format="lab", modal_code="ar-EG",
+                      type="azure"):
     from lang_trans.arabic import buckwalter
 
     # Read the excel file
@@ -151,7 +152,8 @@ def transcribe_arabic(audio_file_path, transcription_file_path,
         audio_file = audio_files[index]
         audios.append(audio_file)
 
-        transcription = engine.transcribe_any_audio(audio_file_path + audio_file, modal_code)
+        transcription = engine.transcribe_any_audio(audio_file_path + audio_file,
+                                                    modal_code, type=type)
         transcription = pre_process_arabic_string(transcription)
         generated_trans.append(transcription)
 
@@ -161,6 +163,8 @@ def transcribe_arabic(audio_file_path, transcription_file_path,
         actual = buckwalter.untrans(actual)
         actual = pre_process_arabic_string(actual)
         actual_trans.append(actual)
+
+        print(index, actual, transcription)
 
         word_er = wer(buckwalter.trans(actual), buckwalter.trans(transcription))
         word_er = 1 if word_er > 1 else word_er
@@ -258,15 +262,101 @@ def has_english_chars(test_str):
 
     return False
 
+def match_string_to_audio():
+    new = pd.read_csv("test.csv", delimiter="\t")
+    print(new.shape)
+    old = pd.read_csv("cv-other-test.csv", delimiter=",")
+    # print(new)
+    print(old.shape)
+    new_len = len(new.values)
+    old_len = len(old.values)
+    sentences = []
+    paths = []
+    for o in range(old_len):
+        # get the actual old text
+        actual = (str(old.at[o, "text"]).replace(".", "")).lower()
+        # print (actual)
+        for n in range(new_len):
+            # current =  (str(new.at[n, "sentence"]).replace(".", "")).lower()
+            current = (str(new.at[n, "sentence"]).replace(".", "")).lower()
+            # print(actual, current)
+            if current == actual:
+                sentences.append(actual)
+                # print("In")
+                path = str(new.at[o, "path"]) + ".mp3"
+                paths.append(path)
+                # print(actual, path)
 
-path = "/home/ameen/development/pycharm/audio_analysis/transcription_performance_test/"
+    output_dictionary = {
+        "paths": paths,
+        "sentences": sentences
+    }
 
+    df = pd.DataFrame(data=output_dictionary)
+    df.to_csv("actual_file" + ".csv")
+
+def match_string_to_audio2():
+    new = pd.read_csv("test.csv", delimiter="\t")
+    print(new.shape)
+    old = pd.read_csv("files.csv", delimiter=",")
+    # print(new)
+    print(old.shape)
+    new_len = len(new.values)
+    old_len = len(old.values)
+    sentences = []
+    paths = []
+
+    for o in range(old_len):
+        # get the actual old text
+        actual = str(old.at[o, "files"]).replace(".mp3", "")
+
+        # print (actual)
+    #     for n in range(new_len):
+    #         # current =  (str(new.at[n, "sentence"]).replace(".", "")).lower()
+    #         current = str(new.at[n, "path"])
+    #         # print(actual, current)
+    #         if current == actual:
+    #             sentences.append(new.at[n, "sentence"])
+    #             # print("In")
+    #             path = current + ".mp3"
+    #             paths.append(path)
+    #             # print(actual, path)
+    #
+    # output_dictionary = {
+    #     "paths": paths,
+    #     "sentences": sentences
+    # }
+    #
+    # df = pd.DataFrame(data=output_dictionary)
+    # df.to_csv("actual_file" + ".csv")
+
+
+# Transcribe audios and translate file. Store the result into a csv file
+def transcribe_audios2(audio_path, csv_file, start=0, format="mp3", modal_code="en-US", type="deepspeech"):
+    # Get result from the engine transcription
+    excel_csv = pd.read_csv(csv_file, delimiter=",")
+
+    print(excel_csv.shape)
+    csv_len = len(excel_csv.values)
+    paths = []
+    for index in range(start, csv_len):
+        print(audio_path + str(excel_csv.at[index, "paths"]))
+        paths.append(audio_path + str(excel_csv.at[index, "paths"]))
+
+    transcribe_audios_from_list(paths, format, modal_code, type)
+
+
+path = "/mnt/c/Users/Ameen/Development/pycharm/audio_analysis/transcription_performance_test/"
 # transcribe_audios("/home/ameen/development/dataset/arabic_audio/",
 #                   format="wav",
 #                   modal_code="en-US")
 
-
 # transcribe_audios("/home/ameen/development/dataset/cv_corpus_v1/cv-valid-dev/",
 #                    format="mp3", modal_code="en-US")
 
-add_scores_into_csv(path + "excel/cv-valid-dev.csv", "text", "google_transcriptionUS")
+add_scores_into_csv(path + "watson_transcription_output_en-US.csv", "actual", "transcription_en-US")
+
+# path = "/mnt/c/Users/Ameen/Development/data/en/clips/"
+# transcribe_arabic(path + "wav/", path + "lab/")
+# match_string_to_audio2()
+# transcribe_audios2(path,"actual_file.csv", start=539, type="google")
