@@ -1,4 +1,4 @@
-Django==2.1.6
+Django
 google-cloud-language
 google-cloud-speech
 google-cloud-translate
@@ -16,10 +16,10 @@ pydub
 pandas
 xlrd
 sklearn
-deepspeech==0.4.1
 jiwer
 lang-trans
 deepspeech
 jiwer
 azure-cognitiveservices-speech
 watson-developer-cloud
+requests

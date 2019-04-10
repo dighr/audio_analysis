@@ -21,6 +21,7 @@ except ImportError:
 
 # These constants control the beam search decoder
 
+
 # Beam width used in the CTC decoder when building candidate transcriptions
 BEAM_WIDTH = 500
 
@@ -78,13 +79,16 @@ def prepare_audio(audio_path):
     return audio, fs, audio_length
 
 
+path = "/mnt/c/Users/Ameen/Development/deepspeech/models/"
+
+
 class DeepSpeech:
     ds = None
 
-    def __init__(self, modal_path="../models/output_graph.pbmm",
-                 alphabet_path="../models/alphabet.txt",
-                 lm_path="../models/lm.binary",
-                 trie_path="../models/trie"):
+    def __init__(self, modal_path=path + "output_graph.pbmm",
+                 alphabet_path=path + "alphabet.txt",
+                 lm_path=path + "lm.binary",
+                 trie_path=path + "trie"):
         self.modal_path = modal_path
         self.alphabet_path = alphabet_path
         self.lm_path = lm_path
@@ -118,6 +122,6 @@ class DeepSpeech:
         print('Inference took %0.3fs for %0.3fs audio file.' % (inference_end, audio_length), file=sys.stderr)
         return transcription
 
-# ds = DeepSpeech()
-# ds.load_modal()
+ds = DeepSpeech()
+ds.load_modal()
 # ds.transcribe()

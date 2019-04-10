@@ -149,7 +149,16 @@ def transcribe_any_audio(file_obj, language_code, type="google"):
         from transcription_analysis import deepspeech
         ds = deepspeech.DeepSpeech()
         text = ds.transcribe(file_name)
+    elif type == "watson":
+        from transcription_analysis.watson_transcription import WatsonTranscription
+        wt = WatsonTranscription("ZvC-ea0NHkQzZbDUDpSK7ygIBqUa5oCsO_CPQp3yrMzi",
+                                 "https://stream.watsonplatform.net/speech-to-text/api")
+        text = wt.transcribe(file_name)
 
+    elif type == "azure":
+        from transcription_analysis.azure_transcription import AzurTranscription
+        at = AzurTranscription("f4e4545e16564863beb1efea6a673e7f", lang=language_code)
+        text = at.transcribe(file_name)
     # Remove file_name
     os.remove(file_name)
     return text

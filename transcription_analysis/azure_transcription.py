@@ -1,8 +1,6 @@
 import json
 import time
-
 import requests
-
 
 def stream_audio_file(speech_file):
     # Chunk audio file
@@ -57,3 +55,8 @@ class AzurTranscription:
         r = requests.post(url, headers=headers, data=stream_audio_file(audio_file))
         results = json.loads(r.content)
         return results['DisplayText'] if results["RecognitionStatus"] == "Success" else ""
+
+# at = AzurTranscription("f4e4545e16564863beb1efea6a673e7f")
+# path = "/mnt/c/Users/Ameen/Development/pycharm/audio_analysis/audio_files/"
+# text = at.transcribe(path + "sample1.wav")
+# print(text)

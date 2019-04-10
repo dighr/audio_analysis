@@ -25,7 +25,7 @@ def get_similarity_score(str1, str2):
     """
     The common way of comparing similarity is to transform the texts into tf-idf vectors,
     then the cosine similarity between both of the strings.
-     See https://towardsdatascience.com/overview-of-text-similarity-metrics-3397c4601f50
+         See https://towardsdatascience.com/overview-of-text-similarity-metrics-3397c4601f50
     Tf-idf (and similar text transformations) are implemented in the Python packages Gensim and
     scikit-learn. In our fuction, sickit-learn was used.
     """

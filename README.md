@@ -1,7 +1,7 @@
 # Audio Analysis
-In this project, an API is created to transcribe and analyze the sentiment values of 
-audio files. 
-The audio file have to be in any of the following formats (WAV, MP3, OGG)
+This project is divided into two parts:
+- an API is created to transcribe, translate, and analyze the sentiment values of audio files using multiple commercial APIs. 
+- The audio file have to be in any of the following formats (WAV, MP3, OGG)
 
 ### Prerequisites
 All of the following needs to be downloaded in your device
@@ -9,6 +9,7 @@ All of the following needs to be downloaded in your device
  * virtualenv
  * pip
  * GOOGLE cloud Credentials
+ * Deepspeech pre-trained model
 
 ### Setting up
  * download the github repo  
@@ -21,7 +22,7 @@ All of the following needs to be downloaded in your device
 ```
 virtualenv -p python3 env
 ```
-* Activate the virtual enviroment
+* Activate the virtual environment
 ```
 source env/bin/activate
 ```
@@ -42,6 +43,9 @@ pip install -r requirements.txt
        ```
          export  GOOGLE_APPLICATION_CREDENTIALS=path-to-the-downloaded-json-file
        ```
+       
+  * Add an environment variable to store the private API keys of both Watson and Azure
+   
     
 ## Getting Started
 Assuming that the previous section is complete, you can start the server by executing the following in  a terminal
@@ -10650,7 +10654,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* A lot of functionalities was enabled thanks to the Pydub library https://github.com/jiaaro/pydub
+* A lot of functionality was enabled thanks to the Pydub library https://github.com/jiaaro/pydub
 * For long audio files, a method created by the following git repo 	https://github.com/akras14/speech-to-text.git was used. 
- However, we make the audio encoding and the audio file splitting automatic
+ However, we made the process of audio encoding and the audio file splitting automatic
 
