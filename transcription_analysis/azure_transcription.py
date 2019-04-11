@@ -1,6 +1,8 @@
 import json
 import time
 import requests
+import os
+
 
 def stream_audio_file(speech_file):
     # Chunk audio file
@@ -12,11 +14,12 @@ def stream_audio_file(speech_file):
             yield data
 
 
-class AzurTranscription:
+class AzureTranscription:
     ctime = None
 
-    def __init__(self, api_key, region='eastus',
+    def __init__(self, api_key=os.getenv("AZURE_KEY"), region='eastus',
                  mode='interactive', lang='en-US', format='simple'):
+        print(api_key)
         self.api_key = api_key
         self.token = None
         self.region = region
@@ -25,8 +28,8 @@ class AzurTranscription:
         self.format = format
 
     def load_token(self):
-        if AzurTranscription.ctime is None:
-            AzurTranscription.ctime = time.time()
+        if AzureTranscription.ctime is None:
+            AzureTranscription.ctime = time.time()
         # Return an Authorization Token by making a HTTP POST request to Cognitive Services with a valid API key.
         url = 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
         headers = {
@@ -38,9 +41,9 @@ class AzurTranscription:
 
     def transcribe(self, audio_file):
         now = time.time()
-        if self.token is None or now - AzurTranscription.ctime >= 540:
+        if self.token is None or now - AzureTranscription.ctime >= 540:
             self.load_token()
-            AzurTranscription.ctime = now
+            AzureTranscription.ctime = now
 
         # Request that the Bing Speech API convert the audio to text
         url = 'https://{0}.stt.speech.microsoft.com/speech/recognition/{1}/cognitiveservices/v1?language={2}&format={3}'.format(
@@ -53,10 +56,6 @@ class AzurTranscription:
             'Authorization': 'Bearer {0}'.format(self.token)
         }
         r = requests.post(url, headers=headers, data=stream_audio_file(audio_file))
+        print(r)
         results = json.loads(r.content)
         return results['DisplayText'] if results["RecognitionStatus"] == "Success" else ""
-
-# at = AzurTranscription("f4e4545e16564863beb1efea6a673e7f")
-# path = "/mnt/c/Users/Ameen/Development/pycharm/audio_analysis/audio_files/"
-# text = at.transcribe(path + "sample1.wav")
-# print(text)
