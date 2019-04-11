@@ -121,7 +121,3 @@ class DeepSpeech:
         inference_end = timer() - inference_start
         print('Inference took %0.3fs for %0.3fs audio file.' % (inference_end, audio_length), file=sys.stderr)
         return transcription
-
-ds = DeepSpeech()
-ds.load_modal()
-# ds.transcribe()
