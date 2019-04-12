@@ -1,10 +1,10 @@
+from __future__ import print_function
 import glob
 import os
 
 import pandas as pd
 from jiwer import wer
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 from transcription_analysis import engine
 
 
@@ -44,6 +44,7 @@ def transcribe_audios(file_paths, format="mp3", modal_code="en-US", type="deepsp
     audio_files = [(file_paths + os.path.basename(f)) for f in glob.glob(os.path.join(file_paths, '*.' + format))]
     audio_files.sort()
     transcribe_audios_from_list(audio_files, format, modal_code, type)
+
 
 def transcribe_audios_from_list(audio_files, format, modal_code, type):
     # Get result from the engine transcription
@@ -112,11 +113,11 @@ def add_scores_into_csv(excel_file, actual_col, generated_col, arabic=True):
     excel_values = excel.values
 
     for index in range(0, len(excel_values)):
-        actual = (excel.at[index, actual_col])
-        generated = (excel.at[index, generated_col])
+        actual = str(excel.at[index, actual_col]).replace(".", "").replace("?", "").replace("!", "").lower()
+        generated = str(excel.at[index, generated_col]).lower()
 
-        score = get_similarity_score(str(actual), str(generated))
-        word_er = wer(str(actual), str(generated))
+        score = get_similarity_score(actual, generated)
+        word_er = wer(actual, generated)
         word_er = 1 if word_er > 1 else word_er
         excel.at[index, "word_error_rate"] = 1 - word_er
         excel.at[index, "scores"] = score
@@ -262,6 +263,7 @@ def has_english_chars(test_str):
 
     return False
 
+
 def match_string_to_audio():
     new = pd.read_csv("test.csv", delimiter="\t")
     print(new.shape)
@@ -295,41 +297,6 @@ def match_string_to_audio():
     df = pd.DataFrame(data=output_dictionary)
     df.to_csv("actual_file" + ".csv")
 
-def match_string_to_audio2():
-    new = pd.read_csv("test.csv", delimiter="\t")
-    print(new.shape)
-    old = pd.read_csv("files.csv", delimiter=",")
-    # print(new)
-    print(old.shape)
-    new_len = len(new.values)
-    old_len = len(old.values)
-    sentences = []
-    paths = []
-
-    for o in range(old_len):
-        # get the actual old text
-        actual = str(old.at[o, "files"]).replace(".mp3", "")
-
-        # print (actual)
-    #     for n in range(new_len):
-    #         # current =  (str(new.at[n, "sentence"]).replace(".", "")).lower()
-    #         current = str(new.at[n, "path"])
-    #         # print(actual, current)
-    #         if current == actual:
-    #             sentences.append(new.at[n, "sentence"])
-    #             # print("In")
-    #             path = current + ".mp3"
-    #             paths.append(path)
-    #             # print(actual, path)
-    #
-    # output_dictionary = {
-    #     "paths": paths,
-    #     "sentences": sentences
-    # }
-    #
-    # df = pd.DataFrame(data=output_dictionary)
-    # df.to_csv("actual_file" + ".csv")
-
 
 # Transcribe audios and translate file. Store the result into a csv file
 def transcribe_audios2(audio_path, csv_file, start=0, format="mp3", modal_code="en-US", type="deepspeech"):
@@ -340,23 +307,157 @@ def transcribe_audios2(audio_path, csv_file, start=0, format="mp3", modal_code="
     csv_len = len(excel_csv.values)
     paths = []
     for index in range(start, csv_len):
-        print(audio_path + str(excel_csv.at[index, "paths"]))
+        # print(audio_path + str(excel_csv.at[index, "paths"]))
         paths.append(audio_path + str(excel_csv.at[index, "paths"]))
 
     transcribe_audios_from_list(paths, format, modal_code, type)
 
 
-path = "/mnt/c/Users/Ameen/Development/pycharm/audio_analysis/transcription_performance_test/"
-# transcribe_audios("/home/ameen/development/dataset/arabic_audio/",
-#                   format="wav",
-#                   modal_code="en-US")
+def aws_bucket_upload(audio_path, csv_file):
+    import boto3
+    bucketName = "audios2019"
+    excel_csv = pd.read_csv(csv_file, delimiter=",")
 
-# transcribe_audios("/home/ameen/development/dataset/cv_corpus_v1/cv-valid-dev/",
-#                    format="mp3", modal_code="en-US")
+    print(excel_csv.shape)
+    csv_len = len(excel_csv.values)
+    paths = []
+    for index in range(0, csv_len):
+        # print(audio_path + str(excel_csv.at[index, "paths"]))
+        paths.append(audio_path + str(excel_csv.at[index, "paths"]))
+        Key = audio_path + str(excel_csv.at[index, "paths"])
+        outPutname = str(excel_csv.at[index, "paths"])
+        print(index, Key)
+        s3 = boto3.client('s3')
+        s3.upload_file(Key, bucketName, outPutname)
 
-add_scores_into_csv(path + "watson_transcription_output_en-US.csv", "actual", "transcription_en-US")
 
+def transcribe_aws():
+    import time
+    import boto3
+    transcribe = boto3.client('transcribe')
+    job_name = "test3"
+    job_uri = "https://s3.amazonaws.com/audios2019/0094552cf0d521e64b0b727c263c605a399ef31b181b97e491dfa76fd7f88e17cd2bb9dac483ffe41ca47e48975c5bf22d9b0294474724259c8f286b6ef8aa03.mp3"
+    transcribe.start_transcription_job(
+        TranscriptionJobName=job_name,
+        Media={'MediaFileUri': job_uri},
+        MediaFormat='mp3',
+        LanguageCode='en-US'
+    )
+    while True:
+        status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
+        if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
+            break
+        print("Not ready yet...")
+        time.sleep(5)
+
+    client = boto3.client('transcribe')
+    client.delete_transcription_job(TranscriptionJobName=job_name)
+    print(status)
+
+
+def extract_data_set(language_code):
+    """
+    Extract ids based on the language_code from https://tatoeba.org/eng/downloads
+    :param language_code:
+    :return:
+    """
+    csv = pd.read_csv("sentences.csv", delimiter="\t", header=None)
+    rows = csv.shape[0]
+    print(rows)
+    ids = []
+    langs = []
+    sentences = []
+
+    for row in range(0, rows):
+        lang = csv.at[row, 1]
+        if lang == language_code:
+            ids.append(csv.at[row, 0])
+            langs.append(csv.at[row, 1])
+            sentences.append(csv.at[row, 2])
+
+    dictionary = {
+        "ID": ids,
+        "langs": langs,
+        "sentences": sentences
+    }
+
+    print(len(sentences))
+    # save
+    df = pd.DataFrame(data=dictionary)
+    df.to_csv("arabic_sentences.csv")
+
+
+def audios():
+    csv = pd.read_csv("sentences_with_audio.csv", delimiter="\t", header=None)
+    # print(csv)
+    arabic_sentences = pd.read_csv("arabic_sentences.csv", delimiter=",")
+    rows = arabic_sentences.shape[0]
+    csv_len = csv.shape[0]
+    print(arabic_sentences.shape, csv.shape)
+    # print(csv.at[0, 1])
+    pos = 0
+    ids = []
+    sentences = []
+    for row in range(0, rows):
+
+        if pos >= csv_len:
+            print("IN")
+            break
+
+        arabic_id = arabic_sentences.at[row, "ID"]
+        # print(arabic_id)
+        audio_id = csv.at[pos, 0]
+
+        while audio_id < arabic_id:
+            audio_id = csv.at[pos, 0]
+            pos = pos + 1
+
+        print(audio_id, arabic_id)
+
+        if audio_id == arabic_id:
+            # Save
+            print(arabic_sentences.at[pos, "sentences"])
+            ids.append(arabic_id)
+            sentences.append(arabic_sentences.at[pos, "sentences"])
+            pos = pos + 1
+
+    dictionary = {
+        "ids": ids,
+        "sentences": sentences
+    }
+
+    df = pd.DataFrame(data=dictionary)
+    df.to_csv("arabic_sentencs_with_audio.csv")
+
+
+def audios2():
+    csv = pd.read_csv("sentences_with_audio.csv", delimiter="\t", header=None)
+    # print(csv)
+    arabic_sentences = pd.read_csv("arabic_sentences.csv", delimiter=",")
+    rows = arabic_sentences.shape[0]
+    csv_len = csv.shape[0]
+    print(arabic_sentences.shape, csv.shape)
+    # print(csv.at[0, 1])
+    pos = 0
+    ids = []
+    sentences = []
+    for i in range(0, rows):
+        arabic_id = arabic_sentences.at[i, "ID"]
+        for j in range(0, csv_len):
+            audio_id = csv.at[j, 0]
+            if audio_id == arabic_id:
+                # sav
+                print(arabic_sentences.at[i, "sentences"])
+                ids.append(arabic_id)
+                sentences.append(arabic_sentences.at[i, "sentences"])
+
+    dictionary = {
+        "ids": ids,
+        "sentences": sentences
+    }
+
+    df = pd.DataFrame(data=dictionary)
+    df.to_csv("arabic_sentencs_with_audio.csv")
+
+audios2()
 # path = "/mnt/c/Users/Ameen/Development/data/en/clips/"
-# transcribe_arabic(path + "wav/", path + "lab/")
-# match_string_to_audio2()
-# transcribe_audios2(path,"actual_file.csv", start=539, type="google")

@@ -25,3 +25,4 @@ azure-cognitiveservices-speech
 watson-developer-cloud
 requests
 tensorflow
+boto3
