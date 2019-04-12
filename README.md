@@ -1,8 +1,7 @@
 # Audio Analysis
 This project is divided into two parts:
 - an API is created to transcribe, translate, and analyze the sentiment values of audio files using multiple commercial APIs. 
-- The audio file have to be in any of the following formats (WAV, MP3, OGG)
-
+- Determining the accuracy of multiple commercial transcription models by transcribing 4070 audio files against each model 
 ### Prerequisites
 All of the following needs to be downloaded in your device
  * Python 3.6
@@ -10652,7 +10651,7 @@ python manage.py test
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-## Acknowledgments
+## Acknowledgment   s
 
 * A lot of functionality was enabled thanks to the Pydub library https://github.com/jiaaro/pydub
 * For long audio files, a method created by the following git repo 	https://github.com/akras14/speech-to-text.git was used. 
