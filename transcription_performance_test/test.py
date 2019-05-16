@@ -46,7 +46,7 @@ def transcribe_audios(file_paths, format="mp3", modal_code="en-US", type="deepsp
     transcribe_audios_from_list(audio_files, format, modal_code, type)
 
 
-def transcribe_audios_from_list(audio_files, format, modal_code, type):
+def transcribe_audios_from_list(audio_files, format, modal_code, type, actual=None):
     # Get result from the engine transcription
     transcription_output = []
     translation_output = []
@@ -63,18 +63,32 @@ def transcribe_audios_from_list(audio_files, format, modal_code, type):
 
         # Save regularly. After every 10 transcription
         if index % 10 == 0:
-            output_dictionary = {"files": files,
-                                 "transcription_" + modal_code: transcription_output,
-                                 # "translation_" + modal_code: translation_output
-                                 }
+            if actual is not None:
+                output_dictionary = {"files": files,
+                                     "acutal": actual[0:(index + 1)],
+                                     "transcription_" + modal_code: transcription_output,
+                                     # "translation_" + modal_code: translation_output
+                                     }
+            else:
+                output_dictionary = {"files": files,
+                                     "transcription_" + modal_code: transcription_output,
+                                     # "translation_" + modal_code: translation_output
+                                     }
             df = pd.DataFrame(data=output_dictionary)
             df.to_csv(type + "_transcription_output_" + modal_code + ".csv")
 
     # last save
-    output_dictionary = {"files": files,
-                         "transcription_" + modal_code: transcription_output,
-                         # "translation_" + modal_code: translation_output
-                         }
+    if actual is not None:
+        output_dictionary = {"files": files,
+                             "acutal": actual,
+                             "transcription_" + modal_code: transcription_output,
+                             # "translation_" + modal_code: translation_output
+                             }
+    else:
+        output_dictionary = {"files": files,
+                             "transcription_" + modal_code: transcription_output,
+                             # "translation_" + modal_code: translation_output
+                             }
     df = pd.DataFrame(data=output_dictionary)
     df.to_csv(type + "_transcription_output_" + modal_code + ".csv")
 
@@ -112,12 +126,18 @@ def add_scores_into_csv(excel_file, actual_col, generated_col, arabic=True):
     excel = pd.read_csv(excel_file, encoding="ISO-8859-1")
     excel_values = excel.values
 
+    sum = 0
     for index in range(0, len(excel_values)):
         actual = str(excel.at[index, actual_col]).replace(".", "").replace("?", "").replace("!", "").lower()
-        generated = str(excel.at[index, generated_col]).lower()
+        generated = str(excel.at[index, generated_col]).replace(".", "").replace("?", "").replace("!", "").lower()
+        # actual = actual.replace(" a ", " ")
+        # actual = actual.replace(" an ", " ")
+        # generated = generated.replace(" a ", " ")
+        # generated = generated.replace(" an ", " ")
 
         score = get_similarity_score(actual, generated)
-        word_er = wer(actual, generated)
+        word_er = wer(actual, generated, standardize=True)
+        sum += word_er
         word_er = 1 if word_er > 1 else word_er
         excel.at[index, "word_error_rate"] = 1 - word_er
         excel.at[index, "scores"] = score
@@ -125,6 +145,8 @@ def add_scores_into_csv(excel_file, actual_col, generated_col, arabic=True):
         print("actual: ", actual)
         print("generated: ", generated)
         print(1 - word_er)
+
+    print((sum / len(excel_values)) * 100)
 
     excel.to_csv(excel_file)
 
@@ -301,16 +323,24 @@ def match_string_to_audio():
 # Transcribe audios and translate file. Store the result into a csv file
 def transcribe_audios2(audio_path, csv_file, start=0, format="mp3", modal_code="en-US", type="deepspeech"):
     # Get result from the engine transcription
-    excel_csv = pd.read_csv(csv_file, delimiter=",")
+    excel_csv = pd.read_csv(csv_file, delimiter="\t")
 
     print(excel_csv.shape)
     csv_len = len(excel_csv.values)
     paths = []
+    actual = []
     for index in range(start, csv_len):
         # print(audio_path + str(excel_csv.at[index, "paths"]))
-        paths.append(audio_path + str(excel_csv.at[index, "paths"]))
+        # print(str(excel_csv.at[index, "path"]))
+        paths.append(audio_path + str(excel_csv.at[index, "path"] + ".mp3"))
+        actual.append(str(excel_csv.at[index, "sentence"]))
 
-    transcribe_audios_from_list(paths, format, modal_code, type)
+    output = {"paths": paths, "actual": actual}
+    df = pd.DataFrame(data=output)
+    df.to_csv("actual.csv")
+
+
+    # transcribe_audios_from_list(paths, format, modal_code, type)
 
 
 def aws_bucket_upload(audio_path, csv_file):
@@ -459,5 +489,52 @@ def audios2():
     df = pd.DataFrame(data=dictionary)
     df.to_csv("arabic_sentencs_with_audio.csv")
 
-audios2()
-# path = "/mnt/c/Users/Ameen/Development/data/en/clips/"
+
+def extract_actual_sentences():
+    rootdir = "/mnt/c/Users/Ameen/Downloads/LibriSpeech/test-clean/"
+    audio_files = []
+    sentences = []
+
+    for subdir, dirs, files in os.walk(rootdir):
+        for index, file in enumerate(files):
+            if "trans" in file:
+                name = os.path.join(subdir, file)
+                actual_trans = pd.read_csv(name, delimiter="\t", header=None)
+                rows = actual_trans.shape[0]
+                for row in range(rows):
+                    sentence = actual_trans.at[row, 0]
+                    words = sentence.split(" ")
+                    # names
+                    file_name = subdir + "/" + words.pop(0) + ".flac"
+                    actual_sentence = " ".join(words)
+                    audio_files.append(file_name)
+                    sentences.append(actual_sentence)
+
+                    print(file_name)
+
+    dictionary = {
+        "files": audio_files,
+        "sentences": sentences
+    }
+    df = pd.DataFrame(data=dictionary)
+    df.to_csv("actual.csv")
+
+
+def audios3():
+    file = pd.read_csv("actual.csv", delimiter=",")
+    files = file.iloc[:, 1]
+    actual = file.iloc[:, 2]
+
+    # ar = []
+    # for file in files:
+    #     # print(file)
+    #     ar.append(file)
+
+    transcribe_audios_from_list(files, actual=actual, format="flac", modal_code="en-US", type='deepspeech')
+
+# extract_actual_sentences()
+# audios3()
+add_scores_into_csv("actual.csv",
+                   "actual", "transcription_en-US")
+# path = "/mnt/c/Users/Ameen/Development/data/en/"
+# transcribe_audios2(path + "clips/", path + "test.tsv", start=0)

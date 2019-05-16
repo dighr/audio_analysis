@@ -2,6 +2,7 @@ import binascii
 import json
 import os
 import tempfile
+
 from google.protobuf.json_format import MessageToJson
 from pydub import AudioSegment
 from transcription_analysis.beans import ErrorBean, ResponseBean
@@ -186,6 +187,11 @@ def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True
         sound = AudioSegment.from_wav(tempfn)
         out = sound.export(file_path, format="wav")
         out.close()
+    elif file_name.endswith(".flac"):
+        # sound = AudioSegment.from_mp3(tempfn)
+        os.system("sox " + tempfn + " " + file_path)
+        # out = sound.export(file_path, format="wav")
+        # out.close()
 
     return file_path
 
