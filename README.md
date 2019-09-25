@@ -8,7 +8,8 @@ All of the following needs to be downloaded in your device
  * virtualenv
  * pip
    * Make sure that the folder where python is downloaded is in the enviroment variable
- * GOOGLE cloud Credentials
+ * Google Cloud Platform API key
+Optional: 
  * Deepspeech pre-trained model
 
 ### Setting up
@@ -110,9 +111,9 @@ python manage.py test
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the [MIT License](LICENSE).
 
-## Acknowledgment   s
+## Acknowledgments
 
 * A lot of functionality was enabled thanks to the Pydub library https://github.com/jiaaro/pydub
 * For long audio files, a method created by the following git repo 	https://github.com/akras14/speech-to-text.git was used. 
