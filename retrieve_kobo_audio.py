@@ -61,7 +61,7 @@ else:
             if key == '_attachments':
                 for item in value:
                     for (key, value) in item.items():
-                        if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.ogg') or value.endswith('.flac')):                                
+                        if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):                                
                             audio_url = value
                             filename = download_file(audio_url)
                             if filename == 'found':
