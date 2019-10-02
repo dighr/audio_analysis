@@ -40,7 +40,7 @@ if len(sys.argv) != 3:
 kpiAssetID = str(sys.argv[1])
 apiToken = 'Token ' + str(sys.argv[2])
 
-url = 'https://kf.kobotoolbox.org/assets/' + kpiAssetID + '/submissions.json'
+url = 'https://kf.kobotoolbox.org/api/v2/assets/' + kpiAssetID + '/data.json'
 headers = { 'Authorization': apiToken }
 
 try:
@@ -56,17 +56,20 @@ else:
     response = response.json()
     # iterates the response body to retrieve all the download urls and
     # downloads the audio files.
-    for entity in response:
-        for (key, value) in entity.items():
-            if key == '_attachments':
-                for item in value:
-                    for (key, value) in item.items():
-                        if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):                                
-                            audio_url = value
-                            filename = download_file(audio_url)
-                            if filename == 'found':
-                                pass
-                            elif filename is not None:
-                                print(filename + " ===> Status: Download completed.")
-                            else:
-                                print("Status: Failed to download, try again.")
+    for (key, value) in response.items():
+        if key == 'results':
+            for item in value:
+                for (key, value) in item.items():
+                    if key == '_attachments':
+                        for item in value:
+                            for (key, value) in item.items():
+                                if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):                                
+                                    audio_url = value
+                                    filename = download_file(audio_url)
+                                    if filename == 'found':
+                                        pass
+                                    elif filename is not None:
+                                        print(filename + " ===> Status: Download completed.")
+                                    else:
+                                        print("Status: Failed to download, try again.")
+                                        
