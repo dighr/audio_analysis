@@ -5,6 +5,7 @@ import os
 import sys
 import urllib.request
 from urllib.error import HTTPError
+import .transcription_analysis.engine as engine
 
 # directory name where the audio files be downloaded
 dirname = os.path.join('.', 'tmp')
@@ -29,7 +30,7 @@ def download_file(url):
             if chunk:
                 f.write(chunk)
                 f.flush()
-    return filename
+    return file_path
 
 # checks if all the required arguments provided
 if len(sys.argv) != 3:
@@ -65,11 +66,14 @@ else:
                             for (key, value) in item.items():
                                 if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):                                
                                     audio_url = value
-                                    filename = download_file(audio_url)
-                                    if filename == 'found':
+                                    file = download_file(audio_url)
+                                    if file == 'found':
                                         pass
-                                    elif filename is not None:
+                                    elif file is not None:
+                                        filename = file.split('/')[-1]
                                         print(filename + " ===> Status: Download completed.")
+                                        print("Starting to transcribe ...")
+                                        engine.handle_audio_transcription_request(file, 'en-US')
                                     else:
                                         print("Status: Failed to download, try again.")
                                         

@@ -2,14 +2,17 @@ import binascii
 import json
 import os
 import tempfile
+import wave
 
 from google.protobuf.json_format import MessageToJson
 from pydub import AudioSegment
 from transcription_analysis.beans import ErrorBean, ResponseBean
 from transcription_analysis.google_transcription import translate_text_from
 from transcription_analysis.google_transcription import get_text_sentiment_values
+from google.cloud import storage
 
 audio_directory_path = os.path.join('.', 'audio_files')
+bucketname = "dighr_bucket" #Name of the bucket created
 
 
 # given a text and a method, retreive the sentiment of that text using method modal
@@ -118,32 +121,64 @@ def handle_audio_transcription_request(file_obj, language_code="en-US"):
         return get_error_message(str(e))
 
 
+def stereo_to_mono(audio_file_name):
+    sound = AudioSegment.from_wav(audio_file_name)
+    sound = sound.set_channels(1)
+    sound.export(audio_file_name, format="wav")
+
+
+def frame_rate_channel(audio_file_name):
+    with wave.open(audio_file_name, "rb") as wave_file:
+        frame_rate = wave_file.getframerate()
+        channels = wave_file.getnchannels()
+        return frame_rate,channels
+
+
+def upload_audio_file(bucket_name, source_file_name, destination_blob_name):
+    """Uploads a file to the bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_filename(source_file_name)
+
+
+def delete_audio_files(bucket_name, blob_name):
+    """Deletes a blob from the bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    blob.delete()
+
+
 def transcribe_any_audio(file_obj, language_code, type):
     # convert the given file into a supported file
     file_name = convert_audio_to_wav(file_obj)
     if file_name is None:
         raise Exception("File was not provided or the provided file is not in the following"
                         " format (WAV, MP3, OGG)")
+
+    frame_rate, channels = frame_rate_channel(file_name)
+    
+    if channels > 1:
+        stereo_to_mono(file_name)
+    
+    bucket_name = bucketname
+    source_file_name = file_name
+    destination_file_name = file_name
+    
+    upload_audio_file(bucket_name, source_file_name, destination_file_name)
+    
+    gcs_uri = 'gs://' + bucket_name + '/' + file_name
+
     text = None
     if type == "google":
         from transcription_analysis.google_transcription import GoogleTranscription
         gt = GoogleTranscription(language_code)
-        text = gt.transcribe(file_name)
-
-    elif type == "deepspeech":
-        from transcription_analysis import deepspeech_transcription
-        ds = deepspeech_transcription.DeepSpeech()
-        text = ds.transcribe(file_name)
-
-    elif type == "watson":
-        from transcription_analysis.watson_transcription import WatsonTranscription
-        wt = WatsonTranscription()
-        text = wt.transcribe(file_name)
-
-    elif type == "azure":
-        from transcription_analysis.azure_transcription import AzureTranscription
-        at = AzureTranscription(lang=language_code)
-        text = at.transcribe(file_name)
+        text = gt.transcribe(gcs_uri, file_name)
+        
+    delete_audio_files(bucket_name, destination_file_name)
     # Remove file_name
     os.remove(file_name)
 
