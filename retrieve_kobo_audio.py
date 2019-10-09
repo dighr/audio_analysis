@@ -5,7 +5,7 @@ import os
 import sys
 import urllib.request
 from urllib.error import HTTPError
-import .transcription_analysis.engine as engine
+import transcription_analysis.engine as engine
 
 # directory name where the audio files be downloaded
 dirname = os.path.join('.', 'tmp')
@@ -49,9 +49,9 @@ try:
     # If the response was successful, no Exception will be raised
     response.raise_for_status()
 except HTTPError as http_err:
-    print(f'HTTP error occurred: {http_err}')
+    print('HTTP error occurred: {http_err}')
 except Exception as err:
-    print(f'Other error occurred: {err}')
+    print('Other error occurred: {err}')
 else:
     # converts response as JSON object
     response = response.json()
