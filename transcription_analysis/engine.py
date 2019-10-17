@@ -11,7 +11,7 @@ from transcription_analysis.google_transcription import translate_text_from
 from transcription_analysis.google_transcription import get_text_sentiment_values
 from google.cloud import storage
 
-audio_directory_path = os.path.join('.', 'audio_files')
+audio_directory_path = os.path.join('.', 'converted_audio_files')
 bucketname = "dighr_bucket" #Name of the bucket created
 
 
@@ -205,6 +205,11 @@ def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True
                 os.write(tempf, chunk)
         os.close(tempf)
 
+    # audio_directory is required to store the converted files,
+    # create it if it does not exist
+    if not os.path.exists(audio_directory):
+        os.makedirs(audio_directory)
+
     id = ""
     if add_id:
         id = str(binascii.hexlify(os.urandom(32)).decode())
@@ -223,10 +228,10 @@ def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True
         out = sound.export(file_path, format="wav")
         out.close()
     elif file_name.endswith(".flac"):
-        # sound = AudioSegment.from_mp3(tempfn)
+        sound = AudioSegment.from_mp3(tempfn)
         os.system("sox " + tempfn + " " + file_path)
-        # out = sound.export(file_path, format="wav")
-        # out.close()
+        out = sound.export(file_path, format="wav")
+        out.close()
 
     return file_path
 

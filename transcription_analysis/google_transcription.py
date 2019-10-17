@@ -6,6 +6,7 @@ To use this class, ensure that the "" is within the enviroment
 
 import os
 import io
+import binascii
 from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.cloud import speech
@@ -18,14 +19,14 @@ from google.cloud.language import enums
 from google.cloud.language import types
 
 tmp_path = os.path.join('.', 'tmp')
+transcribed_audio_dir = os.path.join('.', 'transcribed_audio_files')
 
 
 # translates text from any language to any target language with all the languages supported by
 # google's API
 def translate_text_from(text, source_language, target_language="en"):
     client = translate.Client()
-    translation = client.translate(text,
-                                   source_language=source_language, target_language=target_language)
+    translation = client.translate(text, source_language=source_language, target_language=target_language)
     response = {
         'source_language': source_language,
         'text': text,
@@ -79,6 +80,7 @@ def transcribe_short_audio(file_path, language_code):
     for result in response.results:
         text += result.alternatives[0].transcript
 
+    audio_file.close()
     return text
 
 
@@ -88,6 +90,9 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     # Since tmp_file is required, create it if it does not exist
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
+
+    if not os.path.exists(transcribed_audio_dir):
+        os.makedirs(transcribed_audio_dir)
 
     # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
@@ -140,15 +145,15 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
             text = "*********sub audio was not understood*********"
 
         # Clear
-        os.remove(audio_segment_path)
         out.close()
+        os.remove(audio_segment_path)
 
         return {
             "idx": idx,
             "text": text
         }
 
-    pool = Pool(20)
+    pool = Pool(24)
     all_text = pool.map(transcribe, enumerate(data))
     pool.close()
     pool.join()
@@ -158,7 +163,12 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         # Format time as h:m:s - 30 seconds of text
         transcript += t['text']
 
-    return transcript
+    # strore transcribed audio in a file
+    file_name = str(file_path).split("/")[-1]
+    transcibed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
+    with open(transcibed_audio_file_path, "w") as f:
+        f.write(transcript)
+        f.close()
 
 
 # Encode the audio function
@@ -172,14 +182,13 @@ class GoogleTranscription:
     def __init__(self, language_code):
         self.language_code = language_code
 
-    def transcribe(self, file_name):
+    def transcribe(self, uri, file_name):
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
 
         # Based on the duration, transcribe the audio files
         if duration < 60:
-            text = transcribe_short_audio(file_name, self.language_code)
+            transcribe_short_audio(file_name, self.language_code)
         else:
-            text = transcribe_audio_fast(file_name, self.language_code)
-
-        return text
+            # text = sample_long_running_recognize(uri, self.language_code)
+            transcribe_audio_fast(file_name, self.language_code)

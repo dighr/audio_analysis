@@ -8,7 +8,7 @@ from urllib.error import HTTPError
 import transcription_analysis.engine as engine
 
 # directory name where the audio files be downloaded
-dirname = os.path.join('.', 'tmp')
+dirname = os.path.join('.', 'audio_files')
 
 # downloads audio file into a directory
 def download_file(url):
@@ -24,12 +24,21 @@ def download_file(url):
         print('Skipping... File already exists.')
         return 'found' 
 
-    r = requests.get(url, stream = True)
-    with open(file_path, 'wb') as f:
-        for chunk in r.iter_content(chunk_size = 1024): 
-            if chunk:
-                f.write(chunk)
-                f.flush()
+    authCredentials = ('mdrafiur', 'dighr')
+    try:
+        response = requests.get(url, stream = True, auth = authCredentials)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        with open(file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size = 1024): 
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+
     return file_path
 
 # checks if all the required arguments provided
@@ -49,9 +58,9 @@ try:
     # If the response was successful, no Exception will be raised
     response.raise_for_status()
 except HTTPError as http_err:
-    print('HTTP error occurred: {http_err}')
+    print(f'HTTP error occurred: {http_err}')
 except Exception as err:
-    print('Other error occurred: {err}')
+    print(f'Other error occurred: {err}')
 else:
     # converts response as JSON object
     response = response.json()
@@ -74,6 +83,7 @@ else:
                                         print(filename + " ===> Status: Download completed.")
                                         print("Starting to transcribe ...")
                                         engine.handle_audio_transcription_request(file, 'en-US')
+                                        print('Transcription Completed.\n')
                                     else:
                                         print("Status: Failed to download, try again.")
                                         
