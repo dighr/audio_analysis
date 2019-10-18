@@ -11,7 +11,7 @@ import transcription_analysis.engine as engine
 dirname = os.path.join('.', 'audio_files')
 
 # downloads audio file into a directory
-def download_file(url):
+def download_file(url, req_header):
     filename = url.split('/')[-1]
     file_path = os.path.join(dirname, filename)
 
@@ -24,9 +24,8 @@ def download_file(url):
         print('Skipping... File already exists.')
         return 'found' 
 
-    authCredentials = ('mdrafiur', 'dighr')
     try:
-        response = requests.get(url, stream = True, auth = authCredentials)
+        response = requests.get(url, stream = True, headers=req_header)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -75,7 +74,7 @@ else:
                             for (key, value) in item.items():
                                 if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):                                
                                     audio_url = value
-                                    file = download_file(audio_url)
+                                    file = download_file(audio_url, headers)
                                     if file == 'found':
                                         pass
                                     elif file is not None:
