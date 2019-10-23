@@ -3,7 +3,6 @@ google
 google-cloud-language
 google-cloud-speech
 google-cloud-translate
-google-cloud-storage
 djangorestframework
 SpeechRecognition
 google-api-python-client

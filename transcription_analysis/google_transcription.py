@@ -59,7 +59,7 @@ def get_text_sentiment_values(text):
 
 
 # trascribe audios less than one minute with wav format
-def transcribe_short_audio(file_path, language_code):
+def transcribe_short_audio(file_path, language_code, segment):
     # Instantiates a client
     client = speech.SpeechClient()
 
@@ -76,12 +76,21 @@ def transcribe_short_audio(file_path, language_code):
     # Detects speech in the audio file
     response = client.recognize(config, audio)
 
-    text = ""
+    transcript = ""
     for result in response.results:
-        text += result.alternatives[0].transcript
+        transcript += result.alternatives[0].transcript
 
     audio_file.close()
-    return text
+
+    if not segment:
+        # strore transcribed audio in a file
+        file_name = str(file_path).split("/")[-1]
+        transcibed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
+        with open(transcibed_audio_file_path, "w") as f:
+            f.write(transcript)
+            f.close()
+
+    return transcript
 
 
 # Transcribe audio with any length, the way this is done is by first, dividing the audio file into smalled chucks
@@ -140,7 +149,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
 
         # Transcribe audio file
         try:
-            text = transcribe_short_audio(audio_segment_path, language_code)
+            text = transcribe_short_audio(audio_segment_path, language_code, True)
         except sr.UnknownValueError:
             text = "*********sub audio was not understood*********"
 
@@ -163,7 +172,7 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         # Format time as h:m:s - 30 seconds of text
         transcript += t['text']
 
-    # strore transcribed audio in a file
+    # store transcribed audio into a file
     file_name = str(file_path).split("/")[-1]
     transcibed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
     with open(transcibed_audio_file_path, "w") as f:
@@ -182,13 +191,12 @@ class GoogleTranscription:
     def __init__(self, language_code):
         self.language_code = language_code
 
-    def transcribe(self, uri, file_name):
+    def transcribe(self, file_name):
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
 
         # Based on the duration, transcribe the audio files
         if duration < 60:
-            transcribe_short_audio(file_name, self.language_code)
+            transcribe_short_audio(file_name, self.language_code, False)
         else:
-            # text = sample_long_running_recognize(uri, self.language_code)
             transcribe_audio_fast(file_name, self.language_code)
