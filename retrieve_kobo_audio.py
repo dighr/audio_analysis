@@ -6,6 +6,7 @@ import sys
 import urllib.request
 from urllib.error import HTTPError
 import transcription_analysis.engine as engine
+# from transcription_analysis.models import Files
 
 # directory name where the audio files be downloaded
 dirname = os.path.join('.', 'audio_files')
@@ -81,6 +82,13 @@ else:
                                         filename = file.split('/')[-1]
                                         print(filename + " ===> Status: Download completed.")
                                         print("Starting to transcribe ...")
+                                        
+                                        # name = Files(audio_file_name=filename)
+                                        # path = Files(audio_file_path=filename)
+
+                                        # name.save()
+                                        # path.save()
+
                                         engine.handle_audio_transcription_request(file, 'en-US')
                                         print('Transcription Completed.\n')
                                     else:
