@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 import transcription_analysis.engine as engine
 
-
 # Supports only post requests.
 # An audio file of "wav, MP3, or " format needs to be provided within the request
 class AudioAnalysisView(APIView):
@@ -41,4 +40,12 @@ class TranslationView(APIView):
         text = request.POST.get("text")
         source_language = request.POST.get("language_code")
         response = engine.handle_translation_request(text, source_language)
+        return HttpResponse(response, content_type="text/json")
+
+# Handle retrieve API call
+class RetrieveView(APIView):
+    def post(self, request):
+        kpi_assetid = request.POST.get("assetid")
+        api_token = request.POST.get("token")
+        response = engine.handle_retrieve_request(kpi_assetid, api_token)
         return HttpResponse(response, content_type="text/json")

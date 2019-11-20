@@ -81,9 +81,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'audio_analysis',
-        'USER': 'rafiur',
-        'PASSWORD': 'dighr',
-        'HOST': 'localhost',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': '',
         'PORT': '',
     }
 }
