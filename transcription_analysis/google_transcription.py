@@ -17,6 +17,7 @@ from google.cloud import language
 from google.cloud import translate
 from google.cloud.language import enums
 from google.cloud.language import types
+from transcription_analysis.models import Files
 
 tmp_path = os.path.join('.', 'tmp')
 transcribed_audio_dir = os.path.join('.', 'transcribed_audio_files')
@@ -85,10 +86,19 @@ def transcribe_short_audio(file_path, language_code, segment):
     if not segment:
         # strore transcribed audio in a file
         file_name = str(file_path).split("/")[-1]
-        transcibed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
-        with open(transcibed_audio_file_path, "w") as f:
+        transcribed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
+        with open(transcribed_audio_file_path, "w") as f:
             f.write(transcript)
             f.close()
+
+        name = Files(transcribed_file_name=file_name)
+        path = Files(transcribed_file_path=transcribed_audio_file_path)
+
+        name.save()
+        path.save()
+
+        print(name.transcribed_file_name)
+        print(path.transcribed_file_path)
 
     return transcript
 
@@ -174,11 +184,19 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
 
     # store transcribed audio into a file
     file_name = str(file_path).split("/")[-1]
-    transcibed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
-    with open(transcibed_audio_file_path, "w") as f:
+    transcribed_audio_file_path = os.path.join(transcribed_audio_dir, file_name[:-68] + ".txt")
+    with open(transcribed_audio_file_path, "w") as f:
         f.write(transcript)
         f.close()
 
+    name = Files(transcribed_file_name=file_name)
+    path = Files(transcribed_file_path=transcribed_audio_file_path)
+
+    name.save()
+    path.save()
+
+    print(name.transcribed_file_name)
+    print(path.transcribed_file_path)
 
 # Encode the audio function
 def encode_audio(audio):
