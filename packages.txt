@@ -1,1 +1,3 @@
-postgresql postgresql-contrib libpq-dev ffmpeg
+postgresql postgresql-contrib --yes 
+libpq-dev --yes
+ffmpeg --yes
