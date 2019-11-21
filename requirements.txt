@@ -27,4 +27,3 @@ requests
 tensorflow
 boto3
 psycopg2
-ffmpeg
