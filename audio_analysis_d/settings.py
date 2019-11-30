@@ -25,9 +25,9 @@ AUDIO_ROOT = os.path.join(BASE_DIR, "audios")
 SECRET_KEY = 'l56j%26_y#y1+$1)qqv8k+l=z*&n&ed-^k%!a1oacq!1n%_72r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['159.89.125.88']
 
 
 # Application definition
@@ -81,10 +81,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'audio_analysis',
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': 'audio_analysis_user',
+        'PASSWORD': 'dighr',
+        'HOST': 'localhost',
+        'PORT': ''
     }
 }
 
@@ -125,3 +125,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
