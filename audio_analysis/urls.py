@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('audio/', include('audio_transcription.urls')),
     path('admin/', admin.site.urls),
     path('', include('audio_transcription.urls'))
 ]

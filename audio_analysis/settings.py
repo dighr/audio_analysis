@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '4%sq#@mzo$9(#y-giur5fpvo-cp3qcenuv_@xxj&b)529+em#-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['159.89.125.88']
+ALLOWED_HOSTS = ['nlp.openendeddata.org', '159.89.125.88', 'localhost']
 
 
 # Application definition
@@ -78,8 +78,8 @@ WSGI_APPLICATION = 'audio_analysis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'audio_analysis',
-        'USER': 'audio_analysis_user',
+        'NAME': 'audio_transcription',
+        'USER': 'audio_transcription_user',
         'PASSWORD': 'dighr',
         'HOST': 'localhost',
         'PORT': ''

@@ -4,6 +4,10 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 import audio_transcription.engine as engine
 
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the audio_analysis index.")
+
 # Supports only post requests.
 # An audio file of "wav, MP3, or " format needs to be provided within the request
 class AudioAnalysisView(APIView):
