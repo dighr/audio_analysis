@@ -1,4 +1,4 @@
-Django
+django
 google
 google-cloud-language
 google-cloud-speech
@@ -26,4 +26,5 @@ watson-developer-cloud
 requests
 tensorflow
 boto3
-psycopg2
+gunicorn 
+psycopg2-binary
