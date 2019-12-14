@@ -6,7 +6,7 @@ import audio_transcription.engine as engine
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the audio_analysis index.")
+    return HttpResponse("Hello, world. You're at the audio_analysis page.")
 
 # Supports only post requests.
 # An audio file of "wav, MP3, or " format needs to be provided within the request
