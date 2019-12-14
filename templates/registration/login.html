@@ -1,6 +1,25 @@
-<h2>Login</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.content {
+  max-width: 500px;
+  margin: auto;
+  background: powderblue;
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="content">
+  <h2>Welcome back</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+    <button type="submit">sign in</button>
+  </form>
+</div>
+</body>
+</html>
