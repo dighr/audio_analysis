@@ -91,9 +91,6 @@ def transcribe_short_audio(file_path, language_code, segment):
             f.write(transcript)
             f.close()
 
-        #text = Files(transcription_text=transcript)
-        #text.save()
-
     return transcript
 
 
@@ -103,9 +100,6 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     # Since tmp_file is required, create it if it does not exist
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
-
-    #if not os.path.exists(transcribed_audio_dir):
-    #    os.makedirs(transcribed_audio_dir)
 
     # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
@@ -183,9 +177,6 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         f.write(transcript)
         f.close()
 
-    #text = Files(transcription_text=transcript)
-    #text.save()
-
     return transcript
 
 
@@ -202,7 +193,8 @@ class GoogleTranscription:
     def transcribe(self, file_name):
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
-
+        
+        # Stored transcribed audio files
         if not os.path.exists(transcribed_audio_dir):
             os.makedirs(transcribed_audio_dir)
     
