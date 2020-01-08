@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>NLP project list</h2>
+  {% if project_list %}
+    {% for project in project_list %}
+      {{ project.title }}<br>
+      <br>
+      <br>
+    {% endfor %}
+  {% endif %}
+  <button type="button"><a href="{% url 'add-project' %}">Create new NLP project</a></button>
+{% endblock %}

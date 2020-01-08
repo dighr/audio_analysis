@@ -17,7 +17,7 @@ from google.cloud import language
 from google.cloud import translate
 from google.cloud.language import enums
 from google.cloud.language import types
-from audio_transcription.models import Transcription_text
+from audio_transcription.models import Files
 
 tmp_path = os.path.join('.', 'tmp')
 transcribed_audio_dir = os.path.join('.', 'transcribed_audio_files')
@@ -76,7 +76,7 @@ def transcribe_short_audio(file_path, language_code, segment):
 
     # Detects speech in the audio file
     response = client.recognize(config, audio)
-
+    
     transcript = ""
     for result in response.results:
         transcript += result.alternatives[0].transcript
@@ -91,11 +91,8 @@ def transcribe_short_audio(file_path, language_code, segment):
             f.write(transcript)
             f.close()
 
-        name = Transcription_text(transcribed_file_name=file_name)
-
-        name.save()
-
-        print(name.transcribed_file_name)
+        #text = Files(transcription_text=transcript)
+        #text.save()
 
     return transcript
 
@@ -107,8 +104,8 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
 
-    if not os.path.exists(transcribed_audio_dir):
-        os.makedirs(transcribed_audio_dir)
+    #if not os.path.exists(transcribed_audio_dir):
+    #    os.makedirs(transcribed_audio_dir)
 
     # Open google APPLICATION CREDENTIALS which is stored in the enviroment variables
     with open(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) as f:
@@ -186,16 +183,15 @@ def transcribe_audio_fast(file_path, language_code, name="tmp"):
         f.write(transcript)
         f.close()
 
-    name = Transcription_text(transcribed_file_name=file_name)
+    #text = Files(transcription_text=transcript)
+    #text.save()
 
-    name.save()
+    return transcript
 
-    print(name.transcribed_file_name)
 
 # Encode the audio function
 def encode_audio(audio):
     audio_content = audio.read()
-    # return base64.b64encode(audio_content)
     return audio_content
 
 
@@ -207,8 +203,13 @@ class GoogleTranscription:
         sound = AudioSegment.from_wav(file_name)
         duration = sound.duration_seconds
 
+        if not os.path.exists(transcribed_audio_dir):
+            os.makedirs(transcribed_audio_dir)
+    
         # Based on the duration, transcribe the audio files
         if duration < 60:
-            transcribe_short_audio(file_name, self.language_code, False)
+            text = transcribe_short_audio(file_name, self.language_code, False)
         else:
-            transcribe_audio_fast(file_name, self.language_code)
+            text = transcribe_audio_fast(file_name, self.language_code)
+
+        return text

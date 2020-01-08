@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+  Hi {{ user.username }}!
+  {% include 'project/add_project.html' %}
+{% else %}
+  <a href="{% url 'login' %}">login</a>
+{% endif %}
+{% endblock %}

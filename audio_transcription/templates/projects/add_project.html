@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Add a new project{% endblock title %}
+
+{% block content %}
+<h2>Create new project</h2>
+
+{% if submitted %}
+    <p class="success">
+         Project added successfully!
+    </p>
+
+
+{% else %}
+    <!-- <form action="{% url 'audio-retrieve' %}" method="post"> -->
+    <form action="" method="post">
+	{% csrf_token %}
+	{% for field in form %}
+            <p>
+        	{{ field.label_tag }}    {{ field }}
+            <br>
+            <br>
+      	    </p>
+    	{% endfor %}
+        <input type="submit" value="Create transcriptions">
+    </form>
+ {% endif %}
+ {% endblock content %}
+

@@ -28,3 +28,4 @@ tensorflow
 boto3
 gunicorn 
 psycopg2-binary
+django-dynamic-model

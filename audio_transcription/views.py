@@ -1,12 +1,19 @@
-
-# Create your views here.
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 import audio_transcription.engine as engine
+from audio_transcription.forms import ProjectForm
+from audio_transcription.models import Projects
+from django.views.generic.list import ListView
 
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the audio_analysis page.")
+class ProjectListView(ListView):
+    model = Projects
+    context_object_name = 'project_list'
+    template_name = 'projects/project_list.html'
 
 # Supports only post requests.
 # An audio file of "wav, MP3, or " format needs to be provided within the request
@@ -47,10 +54,40 @@ class TranslationView(APIView):
         response = engine.handle_translation_request(text, source_language)
         return HttpResponse(response, content_type="text/json")
 
+
 # Handle retrieve API call
 class RetrieveView(APIView):
     def post(self, request):
-        kpi_assetid = request.POST.get("assetid")
-        api_token = request.POST.get("token")
+        #kpi_assetid = request.POST.get("assetid")
+        #api_token = request.POST.get("token")
+        kpi_assetid = 'aw3aWxHPvVJ48Kv7uhefj5'
+        api_token = '52c7a8b6b1f0de7848a55e6d5c47aac3929af767'
         response = engine.handle_retrieve_request(kpi_assetid, api_token)
-        return HttpResponse(response, content_type="text/json")
+        #return HttpResponse(response, content_type="text/json")
+
+
+# Handle add_project API call
+class CreateProjectView(APIView):
+    submitted = False
+    form_class = ProjectForm
+    template_name = 'projects/add_project.html'
+
+    def get(self, request):
+        form = self.form_class()
+        if 'submitted' in request.GET:
+            submitted = True
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+
+            kpi_assetid = 'aw3aWxHPvVJ48Kv7uhefj5'
+            api_token = '52c7a8b6b1f0de7848a55e6d5c47aac3929af767'
+            engine.handle_retrieve_request(kpi_assetid, api_token)
+
+            #return HttpResponseRedirect('/add_project/?submitted=True')
+            return HttpResponseRedirect('/')
+
+        return render(request, self.template_name, {'form': form, 'submitted': submitted})

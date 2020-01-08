@@ -13,7 +13,8 @@ from pydub import AudioSegment
 from audio_transcription.beans import ErrorBean, ResponseBean
 from audio_transcription.google_transcription import translate_text_from
 from audio_transcription.google_transcription import get_text_sentiment_values
-from audio_transcription.models import Transcription_text
+from audio_transcription.models import Projects
+from audio_transcription.models import Files
 
 audio_directory_path = os.path.join('.', 'converted_audio_files')
 # directory name where the audio files be downloaded
@@ -112,17 +113,24 @@ def handle_audio_transcription_request(file_obj, language_code="en-US"):
         if iso.lower() != 'en':
             translation = translate_text_from(text, iso.lower())['translation']
 
-        # return the answer in a JSON format
-        response = {
-            'file_name': file_obj.name,
-            'audio_text': text,
-            'translation': translation,
-        }
+        # return the transcribed file
+        return text
 
-        audio_text_bean = ResponseBean(response)
-        return json.dumps(audio_text_bean.__dict__)
     except Exception as e:
         return get_error_message(str(e))
+
+
+def stereo_to_mono(audio_file_name):
+    sound = AudioSegment.from_wav(audio_file_name)
+    sound = sound.set_channels(1)
+    sound.export(audio_file_name, format="wav")
+
+
+def frame_rate_channel(audio_file_name):
+    with wave.open(audio_file_name, "rb") as wave_file:
+        frame_rate = wave_file.getframerate()
+        channels = wave_file.getnchannels()
+        return frame_rate,channels
 
 
 def transcribe_any_audio(file_obj, language_code, type):
@@ -132,14 +140,20 @@ def transcribe_any_audio(file_obj, language_code, type):
         raise Exception("File was not provided or the provided file is not in the following"
                         " format (WAV, MP3, OGG)")
 
+    frame_rate, channels = frame_rate_channel(file_name)
+
+    if channels > 1:
+        stereo_to_mono(file_name)
+
     if type == "google":
         from audio_transcription.google_transcription import GoogleTranscription
         gt = GoogleTranscription(language_code)
-        gt.transcribe(file_name)
+        text = gt.transcribe(file_name)
 
     # Remove file_name
     os.remove(file_name)
 
+    return text
 
 def get_error_message(error):
     error_obj = ErrorBean(error)
@@ -196,8 +210,7 @@ def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True
     return file_path
 
 # downloads audio file into a directory
-def download_file(url, req_header):
-    filename = url.split('/')[-1]
+def download_file(url, filename, req_header):
     file_path = os.path.join(dirname, filename)
 
     # checks and creates the directory if not exists
@@ -230,6 +243,7 @@ def download_file(url, req_header):
 def handle_retrieve_request(assetid, token):
     kpiAssetID = assetid
     apiToken = 'Token ' + token
+    audio_filename = ''
 
     url = 'https://kf.kobotoolbox.org/api/v2/assets/' + kpiAssetID + '/data.json'
     headers = { 'Authorization': apiToken }
@@ -245,35 +259,46 @@ def handle_retrieve_request(assetid, token):
     else:
         # converts response as JSON object
         response = response.json()
+        
         # iterates the response body to retrieve all the download urls and
         # downloads the audio files.
         for (key, value) in response.items():
             if key == 'results':
                 for item in value:
+                    file_record = Files()
                     for (key, value) in item.items():
+                        if key == '_uuid':
+                            uuid = value
+                            file_record.uuid = uuid
                         if key == '_attachments':
                             for item in value:
                                 for (key, value) in item.items():
                                     if key == 'download_url' and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):
                                         audio_url = value
-                                        file = download_file(audio_url, headers)
+                                        audio_filepath = item.get('filename')
+                                        audio_filename = audio_filepath.split('/')[-1]
+                                        
+                                        file = download_file(audio_url, audio_filename, headers)
                                         if file == 'found':
                                             pass
                                         elif file == 'error':
                                             print("Status: Failed to download, try again.")
                                         elif file is not None:
-                                            filename = file.split('/')[-1]
-                                            print(filename + " ===> Status: Download completed.")
-
-                                            # store audio file info into the database
-                                            name = Transcription_text(audio_file_name=filename)
-
-                                            name.save()
+                                            print(audio_filename + " ===> Status: Download completed.")
 
                                             print("Starting to transcribe ...")
-                                            handle_audio_transcription_request(file, 'en-US')
+                                            text = handle_audio_transcription_request(file, 'en-US')
+
+                                            # store audio file info into the transcription db table
+                                            file_record.file_name = audio_filename
+                                            file_record.transcription_text = text
+                                            file_record.save()
+                                            
                                             print('Transcription Completed.\n')
                                         else:
                                             print("Status: Failed to download, try again.")
-
+                        if value == audio_filename:
+                            file_record.question_name = key
+                            file_record.save()
+                            
     return 'Retrival Completed.'
