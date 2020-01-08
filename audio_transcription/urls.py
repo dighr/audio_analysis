@@ -6,8 +6,6 @@ urlpatterns = [
 
     path('', login_required(views.ProjectListView.as_view()), name='projects'),
     path('projects/', login_required(views.ProjectListView.as_view()), name='projects'),
-    #path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    #path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('text/analyze', views.TextAnalysisView().as_view(), name='text-analysis'),
     path('text/translate', views.TranslationView.as_view(), name='text-translation'),
     path('audio/analyze', views.AudioAnalysisView.as_view(), name='audio-analysis'),
