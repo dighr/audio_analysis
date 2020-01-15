@@ -2,11 +2,23 @@
 {% block content %}
   <h2>NLP project list</h2>
   {% if project_list %}
+    <table style="width:100%">
+      <tr>
+        <th align="left">Project name</th>
+        <th align="left">Audio recordings</th>
+        <th></th>
+        <th></th>
+      </tr>
     {% for project in project_list %}
-      {{ project.title }}<br>
-      <br>
-      <br>
+      <tr><br>
+        <td>{{ project.title }}</td>
+        <td>17</td>
+        <td><button type="button"><a href="{% url 'export-csv' %}">Refresh</a></button></td>
+        <td><button type="button"><a href="{% url 'export-csv' %}">Download data</a></button></td>
+      </tr><br>
     {% endfor %}
+    </table>
+    <br><br>
   {% endif %}
   <button type="button"><a href="{% url 'add-project' %}">Create new NLP project</a></button>
 {% endblock %}

@@ -6,6 +6,7 @@ import wave
 import requests
 import sys
 import urllib.request
+import csv
 from urllib.error import HTTPError
 
 from google.protobuf.json_format import MessageToJson
@@ -302,3 +303,13 @@ def handle_retrieve_request(assetid, token):
                             file_record.save()
                             
     return 'Retrival Completed.'
+
+
+def handle_export_csv_file_request(response):
+    items = Files.objects.all()
+    writer = csv.writer(response, delimiter=',')
+
+    for obj in items:
+        writer.writerow([obj.file_name, obj.transcription_text, obj.uuid, obj.question_name])
+
+    return response

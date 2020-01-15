@@ -8,6 +8,8 @@ import audio_transcription.engine as engine
 from audio_transcription.forms import ProjectForm
 from audio_transcription.models import Projects
 from django.views.generic.list import ListView
+from audio_transcription.models import Files
+import csv
 
 
 class ProjectListView(ListView):
@@ -65,6 +67,21 @@ class RetrieveView(APIView):
         response = engine.handle_retrieve_request(kpi_assetid, api_token)
         #return HttpResponse(response, content_type="text/json")
 
+
+class ExpoetCSVView(APIView):
+    def get(self, requesrt):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment;filename='output.csv'"
+
+        items = Files.objects.all()
+        writer = csv.writer(response, delimiter=',')
+
+        for obj in items:
+            writer.writerow([obj.file_name, obj.transcription_text, obj.uuid, obj.question_name])
+
+        return response
+        #response = engine.handle_export_csv_file_request(response) 
+        #return HttpResponseRedirect('/')
 
 # Handle add_project API call
 class CreateProjectView(APIView):
