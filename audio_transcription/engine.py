@@ -311,5 +311,3 @@ def handle_export_csv_file_request(response):
 
     for obj in items:
         writer.writerow([obj.file_name, obj.transcription_text, obj.uuid, obj.question_name])
-
-    return response
