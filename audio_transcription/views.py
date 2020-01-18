@@ -10,11 +10,13 @@ from audio_transcription.models import Projects
 from django.views.generic.list import ListView
 
 
+# Lists the project - also serves as the homepage
 class ProjectListView(ListView):
     model = Projects
     context_object_name = 'project_list'
     template_name = 'projects/project_list.html'
 
+    
 # Supports only post requests.
 # An audio file of "wav, MP3, or " format needs to be provided within the request
 class AudioAnalysisView(APIView):
@@ -65,7 +67,8 @@ class RetrieveView(APIView):
         response = engine.handle_retrieve_request(kpi_assetid, api_token)
         #return HttpResponse(response, content_type="text/json")
 
-
+        
+# Exports transcribed audio files in csv format
 class ExpoetCSVView(APIView):
     def get(self, requesrt):
         response = HttpResponse(content_type="text/csv")
@@ -74,6 +77,7 @@ class ExpoetCSVView(APIView):
         engine.handle_export_csv_file_request(response) 
         return response
 
+    
 # Handle add_project API call
 class CreateProjectView(APIView):
     submitted = False
@@ -91,11 +95,10 @@ class CreateProjectView(APIView):
         if form.is_valid():
             form.save()
 
-            kpi_assetid = 'aw3aWxHPvVJ48Kv7uhefj5'
-            api_token = '52c7a8b6b1f0de7848a55e6d5c47aac3929af767'
+            kpi_assetid = form['asset_id'].value()
+            api_token = form['api_key'].value()
             engine.handle_retrieve_request(kpi_assetid, api_token)
 
-            #return HttpResponseRedirect('/add_project/?submitted=True')
             return HttpResponseRedirect('/')
 
         return render(request, self.template_name, {'form': form, 'submitted': submitted})
