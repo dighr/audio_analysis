@@ -297,7 +297,7 @@ $ sudo ufw allow 'Nginx Full'
 ```
 You should now be able to go to your server’s domain or IP address to view your application.
 
-## Hadling timeout issue (Internal Server Error - 500)
+## Fixing timeout issue (Internal Server Error - 500)
 In order to fix nginx and gunicorn time out issue during audio file transcription the nginx and gunicorn configuration need to updated. Add following to the `/etc/nginx/nginx.conf` file
 ```
 proxy_read_timeout 300s;
