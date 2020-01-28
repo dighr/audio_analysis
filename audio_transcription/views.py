@@ -59,20 +59,20 @@ class TranslationView(APIView):
 
 # Handle retrieve API call
 class RetrieveView(APIView):
-    def post(self, request):
+    def get(self, request):
         #kpi_assetid = request.POST.get("assetid")
         #api_token = request.POST.get("token")
         kpi_assetid = 'aw3aWxHPvVJ48Kv7uhefj5'
         api_token = '52c7a8b6b1f0de7848a55e6d5c47aac3929af767'
-        response = engine.handle_retrieve_request(kpi_assetid, api_token)
-        #return HttpResponse(response, content_type="text/json")
+        engine.handle_retrieve_request(kpi_assetid, api_token)
+        return HttpResponseRedirect('/')
 
         
 # Exports transcribed audio files in csv format
 class ExpoetCSVView(APIView):
     def get(self, requesrt):
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment;filename='output.csv'"
+        response["Content-Disposition"] = "attachment;filename=transcribed_audio.csv"
 
         engine.handle_export_csv_file_request(response) 
         return response
