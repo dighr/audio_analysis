@@ -22,6 +22,9 @@ from audio_transcription.models import Files
 tmp_path = os.path.join('.', 'tmp')
 transcribed_audio_dir = os.path.join('.', 'transcribed_audio_files')
 
+# sets GCP credential to the environment variable explicitly
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/rafiur/kobo_audio_transcription/dighr-audio-analysis-635a1a635257.json"
+
 
 # translates text from any language to any target language with all the languages supported by
 # google's API
