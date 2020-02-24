@@ -7,8 +7,9 @@ import requests
 import sys
 import urllib.request
 import csv
-from urllib.error import HTTPError
+import shutil
 
+from urllib.error import HTTPError
 from google.protobuf.json_format import MessageToJson
 from pydub import AudioSegment
 from audio_transcription.beans import ErrorBean, ResponseBean
@@ -103,15 +104,14 @@ def handle_audio_analysis_request(file_obj, language_code="en-US"):
 
 
 # given a file on instance of UploadedFile, transcribe the audio
-def handle_audio_transcription_request(file_obj, language_code="en-US"):
+def handle_audio_transcription_request(file_obj, language_code):
     try:
         # Get the transcribed text
         text = transcribe_any_audio(file_obj, language_code, type="google")
 
         # translate the text if language_code is not english
-        iso = str(language_code).split("-")[0]
         translation = text
-        if iso.lower() != 'en':
+        if language_code != 'en':
             translation = translate_text_from(text, iso.lower())['translation']
 
         # return the transcribed file
@@ -155,6 +155,7 @@ def transcribe_any_audio(file_obj, language_code, type):
     os.remove(file_name)
 
     return text
+
 
 def get_error_message(error):
     error_obj = ErrorBean(error)
@@ -210,6 +211,7 @@ def convert_audio_to_wav(file, audio_directory=audio_directory_path, add_id=True
 
     return file_path
 
+
 # downloads audio file into a directory
 def download_file(url, filename, req_header):
     file_path = os.path.join(dirname, filename)
@@ -241,9 +243,19 @@ def download_file(url, filename, req_header):
 
     return file_path
 
-def handle_retrieve_request(assetid, token):
+
+# deletes temporary directories as part of clean up process
+def deleteTempDirs():
+    if os.path.exists(audio_directory):
+        shutil.rmtree(audio_directory)
+
+
+# handles audio transcription request. Downloads audio files from kobo site and then pass to GCP to transcribe the audio file.
+# stores transcribed audio files into the postgres db table(audio_transcription_files)
+def handle_retrieve_request(assetid, token, language):
     kpiAssetID = assetid
     apiToken = 'Token ' + token
+    source_language = language
     audio_filename = ''
 
     url = 'https://kf.kobotoolbox.org/api/v2/assets/' + kpiAssetID + '/data.json'
@@ -279,6 +291,7 @@ def handle_retrieve_request(assetid, token):
                                         audio_filepath = item.get('filename')
                                         audio_filename = audio_filepath.split('/')[-1]
                                         
+                                        # downloads the audio file found at the specifies audio_url
                                         file = download_file(audio_url, audio_filename, headers)
                                         if file == 'found':
                                             pass
@@ -288,7 +301,7 @@ def handle_retrieve_request(assetid, token):
                                             print(audio_filename + " ===> Status: Download completed.")
 
                                             print("Starting to transcribe ...")
-                                            text = handle_audio_transcription_request(file, 'en-US')
+                                            text = handle_audio_transcription_request(file, source_language)
 
                                             # store audio file info into the transcription db table
                                             file_record.file_name = audio_filename
@@ -301,7 +314,9 @@ def handle_retrieve_request(assetid, token):
                         if value == audio_filename:
                             file_record.question_name = key
                             file_record.save()
-                            
+                           
+                           
+    deleteTempDirs() 
     return 'Retrival Completed.'
 
 

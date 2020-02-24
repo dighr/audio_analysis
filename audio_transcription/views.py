@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 import audio_transcription.engine as engine
 from audio_transcription.forms import ProjectForm
 from audio_transcription.models import Projects
+from audio_transcription.models import Files
 from django.views.generic.list import ListView
 
 
@@ -15,6 +16,11 @@ class ProjectListView(ListView):
     model = Projects
     context_object_name = 'project_list'
     template_name = 'projects/project_list.html'
+    
+    def get(self, request):
+        project_list = Projects.objects.all()
+        transcribed_file_count = Files.objects.count()
+        return render(request, self.template_name, {'project_list': project_list, 'count': transcribed_file_count})
 
     
 # Supports only post requests.
@@ -97,7 +103,8 @@ class CreateProjectView(APIView):
 
             kpi_assetid = form['asset_id'].value()
             api_token = form['api_key'].value()
-            engine.handle_retrieve_request(kpi_assetid, api_token)
+            source_language = form.cleaned_data['source_language']
+            engine.handle_retrieve_request(kpi_assetid, api_token, source_language)
 
             return HttpResponseRedirect('/')
 
