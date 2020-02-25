@@ -246,8 +246,8 @@ def download_file(url, filename, req_header):
 
 # deletes temporary directories as part of clean up process
 def deleteTempDirs():
-    if os.path.exists(audio_directory):
-        shutil.rmtree(audio_directory)
+    if os.path.exists(audio_directory_path):
+        shutil.rmtree(audio_directory_path)
 
 
 # handles audio transcription request. Downloads audio files from kobo site and then pass to GCP to transcribe the audio file.

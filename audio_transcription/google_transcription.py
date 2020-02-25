@@ -7,6 +7,7 @@ To use this class, ensure that the "" is within the enviroment
 import os
 import io
 import binascii
+import shutil
 from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
 from google.cloud import speech
@@ -189,6 +190,12 @@ def encode_audio(audio):
     return audio_content
 
 
+# deletes temporary directories as part of clean up process
+def deleteTempDirs():
+    if os.path.exists(tmp_path):
+        shutil.rmtree(tmp_path)
+
+
 class GoogleTranscription:
     def __init__(self, language_code):
         self.language_code = language_code
@@ -207,4 +214,5 @@ class GoogleTranscription:
         else:
             text = transcribe_audio_fast(file_name, self.language_code)
 
+        deleteTempDirs()
         return text
