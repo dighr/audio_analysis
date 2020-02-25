@@ -8,7 +8,7 @@ import sys
 import urllib.request
 import csv
 import shutil
-
+import datetime
 from urllib.error import HTTPError
 from google.protobuf.json_format import MessageToJson
 from pydub import AudioSegment
@@ -250,6 +250,17 @@ def deleteTempDirs():
         shutil.rmtree(audio_directory_path)
 
 
+# stores the timestamp since the last start of when the script was run. This will help reduce the number of API requests made and run the script faster.
+def updateLastTranscriptionRequest():
+    
+    f = open("last_transcription_request.txt", "w")
+    # gets current time
+    currentDT = datetime.datetime.now()
+
+    f.write(currentDT.strftime("%Y-%m-%dT%H:%M:%S"))
+    f.close()
+
+
 # handles audio transcription request. Downloads audio files from kobo site and then pass to GCP to transcribe the audio file.
 # stores transcribed audio files into the postgres db table(audio_transcription_files)
 def handle_retrieve_request(assetid, token, language):
@@ -272,7 +283,7 @@ def handle_retrieve_request(assetid, token, language):
     else:
         # converts response as JSON object
         response = response.json()
-        
+        print(json.dumps(response, indent=4)) 
         # iterates the response body to retrieve all the download urls and
         # downloads the audio files.
         for (key, value) in response.items():
@@ -283,6 +294,15 @@ def handle_retrieve_request(assetid, token, language):
                         if key == '_uuid':
                             uuid = value
                             file_record.uuid = uuid
+                        if key == '_submission_time':
+                            submission_time = value
+                            # For each submission, check if it was received by the server after the most recent timestamp 
+                            if os.path.isfile('last_transcription_request.txt'):
+                                f = open("last_transcription_request.txt", "r")
+                                lastTimeExecuted = f.read()
+                                f.close()
+                                if lastTimeExecuted > submission_time:
+                                    break
                         if key == '_attachments':
                             for item in value:
                                 for (key, value) in item.items():
@@ -311,12 +331,13 @@ def handle_retrieve_request(assetid, token, language):
                                             print('Transcription Completed.\n')
                                         else:
                                             print("Status: Failed to download, try again.")
+                        
                         if value == audio_filename:
                             file_record.question_name = key
                             file_record.save()
                            
-                           
-    deleteTempDirs() 
+    deleteTempDirs()
+    updateLastTranscriptionRequest()
     return 'Retrival Completed.'
 
 
