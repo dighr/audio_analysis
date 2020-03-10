@@ -9,7 +9,6 @@ from audio_transcription.forms import ProjectForm
 from audio_transcription.models import Projects
 from audio_transcription.models import Files
 from django.views.generic.list import ListView
-from audio_transcription.models import ProjectManager
 
 # Lists the project - also serves as the homepage
 class ProjectListView(ListView):
