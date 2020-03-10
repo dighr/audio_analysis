@@ -367,7 +367,7 @@ def handle_retrieve_request(assetid, token, language, projectName):
                                             addDataToTranscriptionTable(projectName, audio_filename, text, uuid, question)
                                             
                                             # store transcribed data to a csv file
-                                            writeTOCSVFile(projectName, audio_filename, text, uuid, question)
+                                            writeToCSVFile(projectName, audio_filename, text, uuid, question)
 
                                             print('Transcription Completed.\n')
                                         else:
@@ -379,7 +379,7 @@ def handle_retrieve_request(assetid, token, language, projectName):
     return 'Retrival Completed.'
 
 
-def writeTOCSVFile(projectName, audio_filename, text, uuid, question):
+def writeToCSVFile(projectName, audio_filename, text, uuid, question):
     with open('transcription_text_' + projectName+ '.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([audio_filename, text, uuid, question])
