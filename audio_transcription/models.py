@@ -25,14 +25,14 @@ class ProjectManager(models.Manager):
         fileName_field_schema = FieldSchema.objects.create(name='fileName', data_type='character')
         transcription_text_field_schema = FieldSchema.objects.create(name='transcription_text', data_type='text')
 
-        fileName = fileName_model_schema.add_field(
+        fileName = transcription_table_model_schema.add_field(
             fileName_field_schema,
             null=False,
             unique=False,
             max_length=128
         )
 
-        transcription_text = transcription_text_model_schema.add_field(
+        transcription_text = transcription_table_model_schema.add_field(
             transcription_text_field_schema,
             null=False,
             unique=False,

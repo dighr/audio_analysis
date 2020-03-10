@@ -9,7 +9,7 @@ from audio_transcription.forms import ProjectForm
 from audio_transcription.models import Projects
 from audio_transcription.models import Files
 from django.views.generic.list import ListView
-
+from audio_transcription.models import ProjectManager
 
 # Lists the project - also serves as the homepage
 class ProjectListView(ListView):
@@ -104,7 +104,8 @@ class CreateProjectView(APIView):
             kpi_assetid = form['asset_id'].value()
             api_token = form['api_key'].value()
             source_language = form.cleaned_data['source_language']
-            engine.handle_retrieve_request(kpi_assetid, api_token, source_language)
+            project_name = form['title'].value()
+            engine.handle_retrieve_request(kpi_assetid, api_token, source_language, project_name)
 
             return HttpResponseRedirect('/')
 

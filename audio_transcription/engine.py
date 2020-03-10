@@ -9,13 +9,13 @@ import urllib.request
 import csv
 import shutil
 import datetime
+import psycopg2
 from urllib.error import HTTPError
 from google.protobuf.json_format import MessageToJson
 from pydub import AudioSegment
 from audio_transcription.beans import ErrorBean, ResponseBean
 from audio_transcription.google_transcription import translate_text_from
 from audio_transcription.google_transcription import get_text_sentiment_values
-from audio_transcription.models import Projects
 from audio_transcription.models import Files
 
 audio_directory_path = os.path.join('.', 'converted_audio_files')
@@ -261,13 +261,50 @@ def updateLastTranscriptionRequest():
     f.close()
 
 
+def createTranscriptionTable(name):
+    try:
+        conn = psycopg2.connect(database = "audio_transcription", user = "audio_transcription_user", password = "dighr", host = "localhost")
+    except:
+        print("Failed to connect to the database") 
+
+    cur = conn.cursor()
+    try:
+        sqlCreateTable = "CREATE TABLE " + "transcription_text_" + name + "(id serial NOT NULL PRIMARY KEY, file_name varchar(256) NOT NULL, transcription_text text NOT NULL, uuid varchar(256) NULL, question_name varchar(256) NULL);"
+        cur.execute(sqlCreateTable)
+    except:
+        print("Failed to create table transcription_text_" + name)
+
+    conn.commit()
+    conn.close()
+    cur.close()
+
+
+def addDataToTranscriptionTable(name, fileName, transcriptionText, uuid, questionName):
+    try:
+        conn = psycopg2.connect(database = "audio_transcription", user = "audio_transcription_user", password = "dighr", host = "localhost")
+    except:
+        print("Failed to connect to the database")
+
+    cur = conn.cursor()
+    try:
+        #sqlAddToTable = "insert into transcription_text_" + name + "(file_name,transcription_text,uuid,question_name) values (fileName, transcriptionText, uuid, questionName);"
+        cur.execute("INSERT INTO transcription_text_" + name + "(file_name,transcription_text,uuid,question_name) VALUES(%s, %s, %s, %s)", (fileName, transcriptionText, uuid, questionName))
+    except:
+        print("Failed to add to table transcription_text_" + name)
+
+    conn.commit()
+    conn.close()
+    cur.close()
+
+
 # handles audio transcription request. Downloads audio files from kobo site and then pass to GCP to transcribe the audio file.
 # stores transcribed audio files into the postgres db table(audio_transcription_files)
-def handle_retrieve_request(assetid, token, language):
+def handle_retrieve_request(assetid, token, language, projectName):
     kpiAssetID = assetid
     apiToken = 'Token ' + token
     source_language = language
     audio_filename = ''
+    question = ''
 
     url = 'https://kf.kobotoolbox.org/api/v2/assets/' + kpiAssetID + '/data.json'
     headers = { 'Authorization': apiToken }
@@ -283,17 +320,18 @@ def handle_retrieve_request(assetid, token, language):
     else:
         # converts response as JSON object
         response = response.json()
-        print(json.dumps(response, indent=4)) 
+        
+        # creats a model that stores transcription results associated to current project
+        createTranscriptionTable(projectName)
+
         # iterates the response body to retrieve all the download urls and
         # downloads the audio files.
         for (key, value) in response.items():
             if key == 'results':
                 for item in value:
-                    file_record = Files()
                     for (key, value) in item.items():
-                        if key == '_uuid':
-                            uuid = value
-                            file_record.uuid = uuid
+                        if isinstance(value, str) and (value.endswith('.mp3') or value.endswith('.wav') or value.endswith('.m4a') or value.endswith('.ogg') or value.endswith('.flac')):
+                            question = key
                         if key == '_submission_time':
                             submission_time = value
                             # For each submission, check if it was received by the server after the most recent timestamp 
@@ -303,6 +341,8 @@ def handle_retrieve_request(assetid, token, language):
                                 f.close()
                                 if lastTimeExecuted > submission_time:
                                     break
+                        if key == '_uuid':
+                            uuid = value
                         if key == '_attachments':
                             for item in value:
                                 for (key, value) in item.items():
@@ -324,21 +364,25 @@ def handle_retrieve_request(assetid, token, language):
                                             text = handle_audio_transcription_request(file, source_language)
 
                                             # store audio file info into the transcription db table
-                                            file_record.file_name = audio_filename
-                                            file_record.transcription_text = text
-                                            file_record.save()
+                                            addDataToTranscriptionTable(projectName, audio_filename, text, uuid, question)
                                             
+                                            # store transcribed data to a csv file
+                                            writeTOCSVFile(projectName, audio_filename, text, uuid, question)
+
                                             print('Transcription Completed.\n')
                                         else:
                                             print("Status: Failed to download, try again.")
                         
-                        if value == audio_filename:
-                            file_record.question_name = key
-                            file_record.save()
                            
     deleteTempDirs()
     updateLastTranscriptionRequest()
     return 'Retrival Completed.'
+
+
+def writeTOCSVFile(projectName, audio_filename, text, uuid, question):
+    with open('transcription_text_' + projectName+ '.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([audio_filename, text, uuid, question])
 
 
 def handle_export_csv_file_request(response):
