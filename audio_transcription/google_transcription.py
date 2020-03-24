@@ -18,7 +18,6 @@ from google.cloud import language
 from google.cloud import translate
 from google.cloud.language import enums
 from google.cloud.language import types
-from audio_transcription.models import Files
 
 tmp_path = os.path.join('.', 'tmp')
 transcribed_audio_dir = os.path.join('.', 'transcribed_audio_files')

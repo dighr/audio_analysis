@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view
 import audio_transcription.engine as engine
 from audio_transcription.forms import ProjectForm
 from audio_transcription.models import Projects
-from audio_transcription.models import Files
 from django.views.generic.list import ListView
 
 # Lists the project - also serves as the homepage
@@ -17,9 +16,30 @@ class ProjectListView(ListView):
     template_name = 'projects/project_list.html'
     
     def get(self, request):
+        count_list = []
         project_list = Projects.objects.all()
-        transcribed_file_count = Files.objects.count()
-        return render(request, self.template_name, {'project_list': project_list, 'count': transcribed_file_count})
+
+        # if project has been created get count of the transcribed audio files under that project
+        if project_list.exists():
+            for project in project_list.iterator():
+                project_name = project.title
+                count_list.append(engine.countTranscriptionTableRecords(project_name))
+
+        # if no project has yet been created
+        if not count_list:
+            return render(request, self.template_name, {'project_list': project_list})
+        
+        # Creates a dictionary of project names and corresponding transcribed audio file count
+        # and pass to the template 
+        else:
+            project_count_dict = {}
+            i = 0
+            for project in project_list.iterator():
+                project_name = project.title
+                project_count_dict.update({project_name : count_list[i]})
+                i = i + 1
+
+            return render(request, self.template_name, {'project_list': project_count_dict})
 
     
 # Supports only post requests.

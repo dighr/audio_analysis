@@ -16,7 +16,6 @@ from pydub import AudioSegment
 from audio_transcription.beans import ErrorBean, ResponseBean
 from audio_transcription.google_transcription import translate_text_from
 from audio_transcription.google_transcription import get_text_sentiment_values
-from audio_transcription.models import Files
 
 audio_directory_path = os.path.join('.', 'converted_audio_files')
 # directory name where the audio files be downloaded
@@ -287,7 +286,6 @@ def addDataToTranscriptionTable(name, fileName, transcriptionText, uuid, questio
 
     cur = conn.cursor()
     try:
-        #sqlAddToTable = "insert into transcription_text_" + name + "(file_name,transcription_text,uuid,question_name) values (fileName, transcriptionText, uuid, questionName);"
         cur.execute("INSERT INTO transcription_text_" + name + "(file_name,transcription_text,uuid,question_name) VALUES(%s, %s, %s, %s)", (fileName, transcriptionText, uuid, questionName))
     except:
         print("Failed to add to table transcription_text_" + name)
@@ -295,6 +293,26 @@ def addDataToTranscriptionTable(name, fileName, transcriptionText, uuid, questio
     conn.commit()
     conn.close()
     cur.close()
+
+
+def countTranscriptionTableRecords(name):
+    try:
+        conn = psycopg2.connect(database = "audio_transcription", user = "audio_transcription_user", password = "dighr", host = "localhost")
+    except:
+        print("Failed to connect to the database")
+
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT COUNT (*) FROM transcription_text_" + name)
+        numberOfRows = cur.fetchone()[0]
+    except:
+        print("Failed to add to table transcription_text_" + name)
+
+    conn.commit()
+    conn.close()
+    cur.close()
+
+    return numberOfRows
 
 
 # handles audio transcription request. Downloads audio files from kobo site and then pass to GCP to transcribe the audio file.
