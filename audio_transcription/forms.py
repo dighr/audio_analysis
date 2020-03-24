@@ -6,7 +6,9 @@ TRANSCRIPTION_METHOD_CHOICES = (
 )
 
 SERVER_URL_CHOICES = (
-    ('kobo', 'kfkobotoolbox.org'),
+    ('ktl', 'kf.kobotoolbox.org'),
+    ('khr', 'kobo.humanitarianresponse.info')
+    ('hcr', 'kobo.unhcr.org')
 )
 
 SOURCE_LANGUAGE_CHOICES = (
